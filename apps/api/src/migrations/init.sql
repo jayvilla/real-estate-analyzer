@@ -3,7 +3,7 @@ CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 
 -- Create enum type for propertyType
 DO $$ BEGIN
-  CREATE TYPE property_type_enum AS ENUM ('RESIDENTIAL', 'COMMERCIAL', 'INDUSTRIAL', 'LAND');
+  CREATE TYPE property_type_enum AS ENUM ('SINGLE_FAMILY', 'MULTI_FAMILY', 'CONDO', 'TOWNHOUSE', 'COMMERCIAL', 'LAND');
 EXCEPTION
   WHEN duplicate_object THEN null;
 END $$;
