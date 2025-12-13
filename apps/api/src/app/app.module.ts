@@ -7,12 +7,14 @@ import { DatabaseModule } from '../database/database.module';
 import { PropertyModule } from '../property/property.module';
 import { LoggingInterceptor } from '../common/interceptors/logging.interceptor';
 import { HttpExceptionFilter } from '../common/filters/http-exception.filter';
+import { ValuationSaga } from '../workflows/valuation.saga';
 
 @Module({
   imports: [DatabaseModule, EventEmitterModule.forRoot(), PropertyModule],
   controllers: [AppController],
   providers: [
     AppService,
+    ValuationSaga,
     {
       provide: APP_INTERCEPTOR,
       useClass: LoggingInterceptor,
