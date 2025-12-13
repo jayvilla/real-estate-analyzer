@@ -1,2 +1,2 @@
 export * from './lib/types.js';
-export * from './lib/property';
+export * from './lib/property.js';

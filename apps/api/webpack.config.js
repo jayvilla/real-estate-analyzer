@@ -9,6 +9,15 @@ module.exports = {
       devtoolModuleFilenameTemplate: '[absolute-resource-path]',
     }),
   },
+  resolve: {
+    alias: {
+      '@real-estate-analyzer/types': join(
+        __dirname,
+        '../../libs/types/src/index.ts'
+      ),
+      '@real-estate-analyzer/ui': join(__dirname, '../../libs/ui/src/index.ts'),
+    },
+  },
   plugins: [
     new NxAppWebpackPlugin({
       target: 'node',

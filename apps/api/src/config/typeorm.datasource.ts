@@ -12,5 +12,3 @@ export const typeormConfig: DataSourceOptions = {
   logging: config.logging,
   // Entities and migrations are handled by TypeOrmModule.forRoot with autoLoadEntities
 };
-
-
