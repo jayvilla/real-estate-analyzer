@@ -29,7 +29,7 @@
     "paths": {
       "@/*": ["./src/*"],
       "@real-estate-analyzer/ui": ["../../libs/ui/src/index.ts"],
-      "@real-estate-analyzer/types": ["../../libs/types/src/index.ts"]
+      "@real-estate-analyzer/types": ["../../libs/types/src/index.next.ts"]
     },
     "types": ["jest", "node"],
     "outDir": "dist",
