@@ -1,13 +1,6 @@
 {
   "extends": "../../tsconfig.base.json",
-  "references": [
-    {
-      "path": "../../libs/ui"
-    },
-    {
-      "path": "../../libs/types"
-    }
-  ],
+  "references": [],
   "compilerOptions": {
     "jsx": "preserve",
     "noEmit": true,
