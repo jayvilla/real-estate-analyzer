@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException, Logger } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { EventEmitter2 } from '@nestjs/event-emitter';
@@ -6,71 +6,220 @@ import { PropertyEntity } from './entities/property.entity';
 import { CreatePropertyDto } from './dto/create-property.dto';
 import { UpdatePropertyDto } from './dto/update-property.dto';
 import { PropertyCreatedEvent } from '../events/property-created.event';
+import { StructuredLoggerService } from '../common/logging/structured-logger.service';
 
 @Injectable()
 export class PropertyService {
-  private readonly logger = new Logger(PropertyService.name);
-
   constructor(
     @InjectRepository(PropertyEntity)
     private readonly propertyRepository: Repository<PropertyEntity>,
-    private readonly eventEmitter: EventEmitter2
+    private readonly eventEmitter: EventEmitter2,
+    private readonly logger: StructuredLoggerService
   ) {}
 
   async create(createPropertyDto: CreatePropertyDto): Promise<PropertyEntity> {
-    this.logger.log(`Creating property at ${createPropertyDto.address}`);
-
-    const property = this.propertyRepository.create(createPropertyDto);
-    const savedProperty = await this.propertyRepository.save(property);
-
-    // Emit event for event-driven architecture
-    this.eventEmitter.emit(
-      'property.created',
-      new PropertyCreatedEvent(savedProperty.id, savedProperty)
+    const startTime = Date.now();
+    
+    this.logger.log(
+      `Creating property at ${createPropertyDto.address}`,
+      'PropertyService',
+      {
+        metadata: {
+          address: createPropertyDto.address,
+          city: createPropertyDto.city,
+          propertyType: createPropertyDto.propertyType,
+        },
+      }
     );
 
-    this.logger.log(`Property created with ID: ${savedProperty.id}`);
-    return savedProperty;
+    try {
+      const property = this.propertyRepository.create(createPropertyDto);
+      const savedProperty = await this.propertyRepository.save(property);
+      const duration = Date.now() - startTime;
+
+      // Emit event for event-driven architecture
+      this.eventEmitter.emit(
+        'property.created',
+        new PropertyCreatedEvent(savedProperty.id, savedProperty)
+      );
+
+      this.logger.logWithMetadata(
+        'info',
+        `Property created successfully`,
+        {
+          propertyId: savedProperty.id,
+          address: savedProperty.address,
+          duration,
+        },
+        'PropertyService'
+      );
+
+      return savedProperty;
+    } catch (error) {
+      const duration = Date.now() - startTime;
+      this.logger.error(
+        `Failed to create property: ${error instanceof Error ? error.message : 'Unknown error'}`,
+        error instanceof Error ? error.stack : undefined,
+        'PropertyService',
+        {
+          metadata: {
+            address: createPropertyDto.address,
+            duration,
+          },
+        }
+      );
+      throw error;
+    }
   }
 
   async findAll(): Promise<PropertyEntity[]> {
-    this.logger.log('Finding all properties');
-    return this.propertyRepository.find({
-      order: { createdAt: 'DESC' },
-    });
+    const startTime = Date.now();
+    
+    this.logger.debug('Finding all properties', 'PropertyService');
+
+    try {
+      const properties = await this.propertyRepository.find({
+        order: { createdAt: 'DESC' },
+      });
+      const duration = Date.now() - startTime;
+
+      this.logger.logWithMetadata(
+        'info',
+        `Retrieved ${properties.length} properties`,
+        {
+          count: properties.length,
+          duration,
+        },
+        'PropertyService'
+      );
+
+      return properties;
+    } catch (error) {
+      const duration = Date.now() - startTime;
+      this.logger.error(
+        `Failed to find properties: ${error instanceof Error ? error.message : 'Unknown error'}`,
+        error instanceof Error ? error.stack : undefined,
+        'PropertyService',
+        { metadata: { duration } }
+      );
+      throw error;
+    }
   }
 
   async findOne(id: string): Promise<PropertyEntity> {
-    this.logger.log(`Finding property with ID: ${id}`);
-    const property = await this.propertyRepository.findOne({ where: { id } });
+    this.logger.debug(`Finding property with ID: ${id}`, 'PropertyService');
 
-    if (!property) {
-      this.logger.warn(`Property not found with ID: ${id}`);
-      throw new NotFoundException(`Property with ID ${id} not found`);
+    try {
+      const property = await this.propertyRepository.findOne({ where: { id } });
+
+      if (!property) {
+        this.logger.warn(
+          `Property not found with ID: ${id}`,
+          'PropertyService',
+          { metadata: { propertyId: id } }
+        );
+        throw new NotFoundException(`Property with ID ${id} not found`);
+      }
+
+      return property;
+    } catch (error) {
+      if (error instanceof NotFoundException) {
+        throw error;
+      }
+      this.logger.error(
+        `Failed to find property: ${error instanceof Error ? error.message : 'Unknown error'}`,
+        error instanceof Error ? error.stack : undefined,
+        'PropertyService',
+        { metadata: { propertyId: id } }
+      );
+      throw error;
     }
-
-    return property;
   }
 
   async update(
     id: string,
     updatePropertyDto: UpdatePropertyDto
   ): Promise<PropertyEntity> {
-    this.logger.log(`Updating property with ID: ${id}`);
+    const startTime = Date.now();
+    
+    this.logger.log(
+      `Updating property with ID: ${id}`,
+      'PropertyService',
+      { metadata: { propertyId: id } }
+    );
 
-    const property = await this.findOne(id);
-    Object.assign(property, updatePropertyDto);
+    try {
+      const property = await this.findOne(id);
+      Object.assign(property, updatePropertyDto);
 
-    const updatedProperty = await this.propertyRepository.save(property);
-    this.logger.log(`Property updated with ID: ${id}`);
+      const updatedProperty = await this.propertyRepository.save(property);
+      const duration = Date.now() - startTime;
 
-    return updatedProperty;
+      this.logger.logWithMetadata(
+        'info',
+        `Property updated successfully`,
+        {
+          propertyId: id,
+          duration,
+        },
+        'PropertyService'
+      );
+
+      return updatedProperty;
+    } catch (error) {
+      const duration = Date.now() - startTime;
+      this.logger.error(
+        `Failed to update property: ${error instanceof Error ? error.message : 'Unknown error'}`,
+        error instanceof Error ? error.stack : undefined,
+        'PropertyService',
+        {
+          metadata: {
+            propertyId: id,
+            duration,
+          },
+        }
+      );
+      throw error;
+    }
   }
 
   async remove(id: string): Promise<void> {
-    this.logger.log(`Removing property with ID: ${id}`);
-    const property = await this.findOne(id);
-    await this.propertyRepository.remove(property);
-    this.logger.log(`Property removed with ID: ${id}`);
+    const startTime = Date.now();
+    
+    this.logger.log(
+      `Removing property with ID: ${id}`,
+      'PropertyService',
+      { metadata: { propertyId: id } }
+    );
+
+    try {
+      const property = await this.findOne(id);
+      await this.propertyRepository.remove(property);
+      const duration = Date.now() - startTime;
+
+      this.logger.logWithMetadata(
+        'info',
+        `Property removed successfully`,
+        {
+          propertyId: id,
+          duration,
+        },
+        'PropertyService'
+      );
+    } catch (error) {
+      const duration = Date.now() - startTime;
+      this.logger.error(
+        `Failed to remove property: ${error instanceof Error ? error.message : 'Unknown error'}`,
+        error instanceof Error ? error.stack : undefined,
+        'PropertyService',
+        {
+          metadata: {
+            propertyId: id,
+            duration,
+          },
+        }
+      );
+      throw error;
+    }
   }
 }

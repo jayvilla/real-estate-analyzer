@@ -11,7 +11,8 @@
     "db:logs": "docker-compose logs -f postgres",
     "db:reset": "docker-compose down -v && docker-compose up -d",
     "db:migrate": "PGPASSWORD=postgres psql -h localhost -p 5433 -U postgres -d real_estate_analyzer -f apps/api/src/migrations/init.sql",
-    "db:migrate:update-enum": "PGPASSWORD=postgres psql -h localhost -p 5433 -U postgres -d real_estate_analyzer -f apps/api/src/migrations/update-property-type-enum.sql"
+    "db:migrate:update-enum": "PGPASSWORD=postgres psql -h localhost -p 5433 -U postgres -d real_estate_analyzer -f apps/api/src/migrations/update-property-type-enum.sql",
+    "test:logging": "bash apps/api/test-logging.sh"
   },
   "private": true,
   "devDependencies": {
@@ -45,6 +46,7 @@
     "@types/node": "20.19.9",
     "@types/react": "^19.0.0",
     "@types/react-dom": "^19.0.0",
+    "@types/uuid": "^11.0.0",
     "autoprefixer": "10.4.13",
     "babel-jest": "^30.0.2",
     "eslint": "^9.8.0",
@@ -100,6 +102,7 @@
     "reflect-metadata": "^0.1.13",
     "rxjs": "^7.8.0",
     "typeorm": "^0.3.28",
+    "uuid": "^13.0.0",
     "zustand": "^5.0.9"
   }
 }
