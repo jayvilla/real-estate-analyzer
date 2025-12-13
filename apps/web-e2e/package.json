@@ -1,0 +1,10 @@
+{
+  "name": "@real-estate-analyzer/web-e2e",
+  "version": "0.0.1",
+  "private": true,
+  "nx": {
+    "implicitDependencies": [
+      "@real-estate-analyzer/web"
+    ]
+  }
+}

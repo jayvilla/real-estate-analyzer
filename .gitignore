@@ -89,3 +89,8 @@ Thumbs.db
 # Misc
 # ===============================
 *.tgz
+
+# Next.js
+.next
+out
+test-output
