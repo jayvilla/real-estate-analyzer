@@ -8,14 +8,20 @@ import {
   CreatePropertyDto,
   UpdatePropertyDto,
 } from '@real-estate-analyzer/types';
-import { PropertyTable } from '../../components/property/PropertyTable';
-import { PropertyForm } from '../../components/property/PropertyForm';
 import { Button } from '@real-estate-analyzer/ui';
-import PropertyDetailModal from '../../components/property/PropertyDetailModal';
-import { PropertyListBoundary } from '../../components/property/PropertyListBoundary';
-import { PropertyFormBoundary } from '../../components/property/PropertyFormBoundary';
-import { PropertyModalBoundary } from '../../components/property/PropertyModalBoundary';
 import { PropertyProvider } from '../../stores/context/PropertyContext';
+
+// Dynamic imports for better code splitting
+import {
+  PropertyTable,
+  PropertyForm,
+  PropertyDetailModal,
+} from '../../components/property/dynamic-imports';
+import {
+  PropertyListBoundary,
+  PropertyFormBoundary,
+  PropertyModalBoundary,
+} from '../../components/property/dynamic-boundaries';
 
 export default function PropertiesPage() {
   const queryClient = useQueryClient();
@@ -136,7 +142,7 @@ export default function PropertiesPage() {
             </Button>
           </div>
 
-          {/* Form Section - Isolated boundary */}
+          {/* Form Section - Dynamically loaded with boundary */}
           {showForm && (
             <PropertyFormBoundary
               onRetry={handleRetryForm}
@@ -162,7 +168,7 @@ export default function PropertiesPage() {
             </PropertyFormBoundary>
           )}
 
-          {/* Properties Table Section - Isolated boundary */}
+          {/* Properties Table Section - Dynamically loaded with boundary */}
           <PropertyListBoundary onRetry={handleRetryList}>
             <div className="glass rounded-3xl border border-neutral-200/50 shadow-medium overflow-hidden animate-fade-in-up delay-100">
               {isLoading ? (
@@ -209,7 +215,7 @@ export default function PropertiesPage() {
             </div>
           </PropertyListBoundary>
 
-          {/* Property Detail Modal - Isolated boundary */}
+          {/* Property Detail Modal - Dynamically loaded with boundary */}
           {selectedProperty && (
             <PropertyModalBoundary
               onRetry={() => {
