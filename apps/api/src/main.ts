@@ -3,7 +3,7 @@
  * This is only a minimal backend to get started.
  */
 
-import { Logger, ValidationPipe } from '@nestjs/common';
+import { Logger, ValidationPipe, BadRequestException } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app/app.module';
 
@@ -16,7 +16,7 @@ async function bootstrap() {
     credentials: true,
   });
 
-  // Global validation pipe
+  // Global validation pipe with enhanced error messages
   app.useGlobalPipes(
     new ValidationPipe({
       whitelist: true,
@@ -24,6 +24,34 @@ async function bootstrap() {
       transform: true,
       transformOptions: {
         enableImplicitConversion: true,
+      },
+      // Enhanced error messages
+      exceptionFactory: (errors) => {
+        const formattedErrors = errors.map((error) => {
+          const constraints = error.constraints || {};
+          const messages = Object.values(constraints);
+          return {
+            field: error.property,
+            message: messages[0] || 'Validation failed',
+            value: error.value,
+            constraints,
+          };
+        });
+
+        // Return BadRequestException with validationErrors in the response
+        const exception = new BadRequestException({
+          message: 'Validation failed',
+          error: 'Bad Request',
+          statusCode: 400,
+        });
+        
+        // Attach validationErrors to the exception response
+        (exception as any).response = {
+          ...exception.getResponse(),
+          validationErrors: formattedErrors,
+        };
+        
+        return exception;
       },
     }),
   );

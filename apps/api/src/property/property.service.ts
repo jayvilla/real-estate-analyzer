@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { EventEmitter2 } from '@nestjs/event-emitter';
@@ -7,6 +7,7 @@ import { CreatePropertyDto } from './dto/create-property.dto';
 import { UpdatePropertyDto } from './dto/update-property.dto';
 import { PropertyCreatedEvent } from '../events/property-created.event';
 import { StructuredLoggerService } from '../common/logging/structured-logger.service';
+import { PropertyNotFoundException, DatabaseException } from '../common/errors/custom-exceptions';
 
 @Injectable()
 export class PropertyService {
@@ -57,6 +58,29 @@ export class PropertyService {
       return savedProperty;
     } catch (error) {
       const duration = Date.now() - startTime;
+      
+      // Re-throw custom exceptions as-is
+      if (error instanceof PropertyNotFoundException || error instanceof DatabaseException) {
+        throw error;
+      }
+
+      // Wrap database errors in DatabaseException
+      if (error instanceof Error && error.name.includes('QueryFailedError')) {
+        this.logger.error(
+          `Database error creating property: ${error.message}`,
+          error.stack,
+          'PropertyService',
+          {
+            metadata: {
+              address: createPropertyDto.address,
+              duration,
+            },
+          }
+        );
+        throw new DatabaseException(error.message, error);
+      }
+
+      // Log and re-throw other errors
       this.logger.error(
         `Failed to create property: ${error instanceof Error ? error.message : 'Unknown error'}`,
         error instanceof Error ? error.stack : undefined,
@@ -118,14 +142,27 @@ export class PropertyService {
           'PropertyService',
           { metadata: { propertyId: id } }
         );
-        throw new NotFoundException(`Property with ID ${id} not found`);
+        throw new PropertyNotFoundException(id);
       }
 
       return property;
     } catch (error) {
-      if (error instanceof NotFoundException) {
+      // Re-throw custom exceptions as-is
+      if (error instanceof PropertyNotFoundException || error instanceof DatabaseException) {
         throw error;
       }
+
+      // Wrap database errors
+      if (error instanceof Error && error.name.includes('QueryFailedError')) {
+        this.logger.error(
+          `Database error finding property: ${error.message}`,
+          error.stack,
+          'PropertyService',
+          { metadata: { propertyId: id } }
+        );
+        throw new DatabaseException(error.message, error);
+      }
+
       this.logger.error(
         `Failed to find property: ${error instanceof Error ? error.message : 'Unknown error'}`,
         error instanceof Error ? error.stack : undefined,

@@ -1,0 +1,71 @@
+/**
+ * Standardized error codes for API responses.
+ * These codes help clients identify and handle specific error types.
+ */
+export enum ErrorCode {
+  // Validation Errors (400)
+  VALIDATION_ERROR = 'VALIDATION_ERROR',
+  INVALID_INPUT = 'INVALID_INPUT',
+  MISSING_REQUIRED_FIELD = 'MISSING_REQUIRED_FIELD',
+  INVALID_FORMAT = 'INVALID_FORMAT',
+
+  // Authentication & Authorization (401, 403)
+  UNAUTHORIZED = 'UNAUTHORIZED',
+  FORBIDDEN = 'FORBIDDEN',
+  TOKEN_EXPIRED = 'TOKEN_EXPIRED',
+  INVALID_CREDENTIALS = 'INVALID_CREDENTIALS',
+
+  // Not Found (404)
+  RESOURCE_NOT_FOUND = 'RESOURCE_NOT_FOUND',
+  PROPERTY_NOT_FOUND = 'PROPERTY_NOT_FOUND',
+  USER_NOT_FOUND = 'USER_NOT_FOUND',
+
+  // Conflict (409)
+  RESOURCE_CONFLICT = 'RESOURCE_CONFLICT',
+  DUPLICATE_ENTRY = 'DUPLICATE_ENTRY',
+
+  // Server Errors (500)
+  INTERNAL_SERVER_ERROR = 'INTERNAL_SERVER_ERROR',
+  DATABASE_ERROR = 'DATABASE_ERROR',
+  EXTERNAL_SERVICE_ERROR = 'EXTERNAL_SERVICE_ERROR',
+
+  // Rate Limiting (429)
+  RATE_LIMIT_EXCEEDED = 'RATE_LIMIT_EXCEEDED',
+
+  // Bad Request (400)
+  BAD_REQUEST = 'BAD_REQUEST',
+  INVALID_UUID = 'INVALID_UUID',
+  INVALID_ENUM_VALUE = 'INVALID_ENUM_VALUE',
+}
+
+/**
+ * Maps error codes to HTTP status codes
+ */
+export const ErrorCodeToStatus: Record<ErrorCode, number> = {
+  [ErrorCode.VALIDATION_ERROR]: 400,
+  [ErrorCode.INVALID_INPUT]: 400,
+  [ErrorCode.MISSING_REQUIRED_FIELD]: 400,
+  [ErrorCode.INVALID_FORMAT]: 400,
+  [ErrorCode.BAD_REQUEST]: 400,
+  [ErrorCode.INVALID_UUID]: 400,
+  [ErrorCode.INVALID_ENUM_VALUE]: 400,
+
+  [ErrorCode.UNAUTHORIZED]: 401,
+  [ErrorCode.TOKEN_EXPIRED]: 401,
+  [ErrorCode.INVALID_CREDENTIALS]: 401,
+
+  [ErrorCode.FORBIDDEN]: 403,
+
+  [ErrorCode.RESOURCE_NOT_FOUND]: 404,
+  [ErrorCode.PROPERTY_NOT_FOUND]: 404,
+  [ErrorCode.USER_NOT_FOUND]: 404,
+
+  [ErrorCode.RESOURCE_CONFLICT]: 409,
+  [ErrorCode.DUPLICATE_ENTRY]: 409,
+
+  [ErrorCode.RATE_LIMIT_EXCEEDED]: 429,
+
+  [ErrorCode.INTERNAL_SERVER_ERROR]: 500,
+  [ErrorCode.DATABASE_ERROR]: 500,
+  [ErrorCode.EXTERNAL_SERVICE_ERROR]: 500,
+};
