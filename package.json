@@ -5,7 +5,11 @@
   "scripts": {
     "dev": "nx run-many -t serve dev --projects=api,web --parallel",
     "dev:api": "nx serve api",
-    "dev:web": "nx dev web"
+    "dev:web": "nx dev web",
+    "db:up": "docker-compose up -d",
+    "db:down": "docker-compose down",
+    "db:logs": "docker-compose logs -f postgres",
+    "db:reset": "docker-compose down -v && docker-compose up -d"
   },
   "private": true,
   "devDependencies": {
