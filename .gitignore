@@ -1,42 +1,91 @@
-# See https://docs.github.com/en/get-started/getting-started-with-git/ignoring-files for more about ignoring files.
+# ===============================
+# Dependencies
+# ===============================
+node_modules/
+.pnp/
+.pnp.js
 
-# compiled output
-dist
-tmp
-out-tsc
+# ===============================
+# Nx
+# ===============================
+.nx/
+dist/
+tmp/
+.cache/
+.nx-cache/
 
-# dependencies
-node_modules
+# ===============================
+# Build Outputs
+# ===============================
+build/
+out/
+coverage/
+storybook-static/
 
-# IDEs and editors
-/.idea
-.project
-.classpath
-.c9/
-*.launch
-.settings/
-*.sublime-workspace
+# ===============================
+# Next.js
+# ===============================
+.next/
+.next/cache/
 
-# IDE - VSCode
+# ===============================
+# NestJS
+# ===============================
+dist/
+apps/**/dist/
+
+# ===============================
+# Logs
+# ===============================
+logs/
+*.log
+npm-debug.log*
+pnpm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+error.log
+
+# ===============================
+# Environment Variables
+# ===============================
+.env
+.env.*
+!.env.example
+
+# ===============================
+# Testing
+# ===============================
+coverage/
+test-results/
+playwright-report/
+blob-report/
+.vitest/
+*.spec.ts.snap
+
+# ===============================
+# IDEs / Editors
+# ===============================
 .vscode/*
-!.vscode/settings.json
-!.vscode/tasks.json
-!.vscode/launch.json
 !.vscode/extensions.json
+!.vscode/settings.json
+.vscode/extensions.json
 
-# misc
-/.sass-cache
-/connect.lock
-/coverage
-/libpeerconnection.log
-npm-debug.log
-yarn-error.log
-testem.log
-/typings
+.idea/
+*.swp
+*.swo
 
-# System Files
+# ===============================
+# OS
+# ===============================
 .DS_Store
 Thumbs.db
 
-.nx/cache
-.nx/workspace-data
+# ===============================
+# TypeScript
+# ===============================
+*.tsbuildinfo
+
+# ===============================
+# Misc
+# ===============================
+*.tgz
