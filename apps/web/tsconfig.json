@@ -1,5 +1,13 @@
 {
   "extends": "../../tsconfig.base.json",
+  "references": [
+    {
+      "path": "../../libs/ui"
+    },
+    {
+      "path": "../../libs/types"
+    }
+  ],
   "compilerOptions": {
     "jsx": "preserve",
     "noEmit": true,
@@ -19,11 +27,12 @@
       }
     ],
     "paths": {
-      "@/*": ["./src/*"]
+      "@/*": ["./src/*"],
+      "@real-estate-analyzer/ui": ["../../libs/ui/src/index.ts"],
+      "@real-estate-analyzer/types": ["../../libs/types/src/index.ts"]
     },
     "types": ["jest", "node"],
     "outDir": "dist",
-    "rootDir": "src",
     "tsBuildInfoFile": "dist/tsconfig.tsbuildinfo"
   },
   "include": [

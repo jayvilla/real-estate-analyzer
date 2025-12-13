@@ -14,7 +14,6 @@ export default function Index() {
               Welcome @real-estate-analyzer/web 👋
             </h1>
           </div>
-
           <div id="hero" className="rounded">
             <div className="text-container">
               <h2>

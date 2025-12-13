@@ -16,6 +16,10 @@
     "skipLibCheck": true,
     "strict": true,
     "target": "es2022",
-    "customConditions": ["@real-estate-analyzer/source"]
+    "customConditions": ["@real-estate-analyzer/source"],
+    "paths": {
+      "@real-estate-analyzer/ui": ["libs/ui/src/index.ts"],
+      "@real-estate-analyzer/types": ["libs/types/src/index.ts"]
+    }
   }
 }
