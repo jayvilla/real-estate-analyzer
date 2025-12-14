@@ -10,4 +10,5 @@ export * from './lib/market.js';
 export * from './lib/llm.js';
 export * from './lib/nlq.js';
 export * from './lib/summary.js';
+export * from './lib/ai-infrastructure.js';
 export * from './lib/summary.js';

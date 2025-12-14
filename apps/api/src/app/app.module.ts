@@ -18,6 +18,7 @@ import { MarketModule } from '../market/market.module';
 import { LLMModule } from '../llm/llm.module';
 import { NLQModule } from '../nlq/nlq.module';
 import { SummaryModule } from '../summary/summary.module';
+import { AIInfrastructureModule } from '../ai-infrastructure/ai-infrastructure.module';
 import { LoggingInterceptor } from '../common/interceptors/logging.interceptor';
 import { HttpExceptionFilter } from '../common/filters/http-exception.filter';
 import { CorrelationIdMiddleware } from '../common/middleware/correlation-id.middleware';
@@ -42,6 +43,7 @@ import { ValuationSaga } from '../workflows/valuation.saga';
     LLMModule, // LLM-assisted insights
     NLQModule, // Natural language queries
     SummaryModule, // AI-driven summaries
+    AIInfrastructureModule, // AI infrastructure & integration
   ],
   controllers: [AppController],
   providers: [

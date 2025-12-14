@@ -11,5 +11,6 @@ export * from './lib/market';
 export * from './lib/llm';
 export * from './lib/nlq';
 export * from './lib/summary';
+export * from './lib/ai-infrastructure';
 export * from './lib/summary';
 
