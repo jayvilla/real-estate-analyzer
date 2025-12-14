@@ -8,6 +8,7 @@ import { UpdatePropertyDto } from './dto/update-property.dto';
 import { PropertyCreatedEvent } from '../events/property-created.event';
 import { StructuredLoggerService } from '../common/logging/structured-logger.service';
 import { PropertyNotFoundException, DatabaseException } from '../common/errors/custom-exceptions';
+import { RequestContextService } from '../common/context/request-context.service';
 
 @Injectable()
 export class PropertyService {
@@ -15,7 +16,8 @@ export class PropertyService {
     @InjectRepository(PropertyEntity)
     private readonly propertyRepository: Repository<PropertyEntity>,
     private readonly eventEmitter: EventEmitter2,
-    private readonly logger: StructuredLoggerService
+    private readonly logger: StructuredLoggerService,
+    private readonly requestContext: RequestContextService
   ) {}
 
   async create(createPropertyDto: CreatePropertyDto): Promise<PropertyEntity> {
@@ -38,10 +40,11 @@ export class PropertyService {
       const savedProperty = await this.propertyRepository.save(property);
       const duration = Date.now() - startTime;
 
-      // Emit event for event-driven architecture
+      // Emit event for event-driven architecture with correlation ID
+      const correlationId = this.requestContext.getCorrelationId();
       this.eventEmitter.emit(
         'property.created',
-        new PropertyCreatedEvent(savedProperty.id, savedProperty)
+        new PropertyCreatedEvent(savedProperty.id, savedProperty, undefined, correlationId)
       );
 
       this.logger.logWithMetadata(

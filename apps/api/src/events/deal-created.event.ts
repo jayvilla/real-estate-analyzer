@@ -1,9 +1,11 @@
 import { BaseEvent } from './base-event';
+import { DealEntity } from '../deal/entities/deal.entity';
 
-export class ValuationRequestedEvent extends BaseEvent {
+export class DealCreatedEvent extends BaseEvent {
   constructor(
+    public readonly dealId: string,
     public readonly propertyId: string,
-    public readonly requestedBy: string,
+    public readonly deal: DealEntity,
     eventId?: string,
     correlationId?: string
   ) {

@@ -7,6 +7,9 @@ import { DatabaseModule } from '../database/database.module';
 import { PropertyModule } from '../property/property.module';
 import { DealModule } from '../deal/deal.module';
 import { ValuationModule } from '../valuation/valuation.module';
+import { HandlersModule } from '../handlers/handlers.module';
+import { EventStoreModule } from '../common/event-store/event-store.module';
+import { ContextModule } from '../common/context/context.module';
 import { LoggingModule } from '../common/logging/logging.module';
 import { LoggingInterceptor } from '../common/interceptors/logging.interceptor';
 import { HttpExceptionFilter } from '../common/filters/http-exception.filter';
@@ -20,12 +23,15 @@ import { ValuationSaga } from '../workflows/valuation.saga';
     PropertyModule,
     DealModule,
     ValuationModule,
+    HandlersModule, // Event handlers
+    EventStoreModule, // Event store for idempotency
+    ContextModule, // Request context service
     LoggingModule, // Global logging module
   ],
   controllers: [AppController],
   providers: [
     AppService,
-    ValuationSaga,
+    ValuationSaga, // Saga/workflow orchestration
     {
       provide: APP_INTERCEPTOR,
       useClass: LoggingInterceptor,

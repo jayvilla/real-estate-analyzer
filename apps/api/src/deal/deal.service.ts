@@ -13,6 +13,9 @@ import {
 } from '../common/errors/custom-exceptions';
 import { PropertyService } from '../property/property.service';
 import { DealStatus } from '@real-estate-analyzer/types';
+import { DealCreatedEvent } from '../events/deal-created.event';
+import { DealUpdatedEvent } from '../events/deal-updated.event';
+import { RequestContextService } from '../common/context/request-context.service';
 
 @Injectable()
 export class DealService {
@@ -21,7 +24,8 @@ export class DealService {
     private readonly dealRepository: Repository<DealEntity>,
     private readonly propertyService: PropertyService,
     private readonly eventEmitter: EventEmitter2,
-    private readonly logger: StructuredLoggerService
+    private readonly logger: StructuredLoggerService,
+    private readonly requestContext: RequestContextService
   ) {}
 
   async create(createDealDto: CreateDealDto): Promise<DealEntity> {
@@ -72,6 +76,13 @@ export class DealService {
       });
 
       const savedDeal = await this.dealRepository.save(deal);
+
+      // Emit event for event-driven architecture
+      const correlationId = this.requestContext.getCorrelationId();
+      this.eventEmitter.emit(
+        'deal.created',
+        new DealCreatedEvent(savedDeal.id, savedDeal.propertyId, savedDeal, undefined, correlationId)
+      );
 
       const duration = Date.now() - startTime;
       this.logger.logWithMetadata(
@@ -285,8 +296,29 @@ export class DealService {
         ) as any;
       }
 
+      // Store previous values for event
+      const previousValues: Partial<DealEntity> = {
+        purchasePrice: deal.purchasePrice,
+        loanAmount: deal.loanAmount,
+        interestRate: deal.interestRate,
+        loanTerm: deal.loanTerm,
+        monthlyRentalIncome: deal.monthlyRentalIncome,
+        annualRentalIncome: deal.annualRentalIncome,
+        monthlyExpenses: deal.monthlyExpenses,
+        annualExpenses: deal.annualExpenses,
+        vacancyRate: deal.vacancyRate,
+        propertyManagementRate: deal.propertyManagementRate,
+      };
+
       Object.assign(deal, updateDealDto);
       const updatedDeal = await this.dealRepository.save(deal);
+
+      // Emit event for event-driven architecture
+      const correlationId = this.requestContext.getCorrelationId();
+      this.eventEmitter.emit(
+        'deal.updated',
+        new DealUpdatedEvent(updatedDeal.id, updatedDeal.propertyId, updatedDeal, previousValues, undefined, correlationId)
+      );
 
       const duration = Date.now() - startTime;
       this.logger.logWithMetadata(
