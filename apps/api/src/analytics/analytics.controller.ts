@@ -2,12 +2,25 @@ import {
   Controller,
   Get,
   Query,
+  UseGuards,
+  Request,
 } from '@nestjs/common';
+import {
+  ApiTags,
+  ApiOperation,
+  ApiResponse,
+  ApiQuery,
+  ApiBearerAuth,
+} from '@nestjs/swagger';
 import { AnalyticsService } from './analytics.service';
 import { AnalyticsCacheService } from './cache/analytics-cache.service';
 import { AggregationOptions } from '@real-estate-analyzer/types';
+import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 
+@ApiTags('Analytics')
 @Controller('analytics')
+@UseGuards(JwtAuthGuard)
+@ApiBearerAuth('JWT-auth')
 export class AnalyticsController {
   constructor(
     private readonly analyticsService: AnalyticsService,
@@ -19,7 +32,17 @@ export class AnalyticsController {
    * GET /api/analytics/dashboard
    */
   @Get('dashboard')
-  async getDashboard(@Query() query: any) {
+  @ApiOperation({
+    summary: 'Get analytics dashboard',
+    description: 'Returns comprehensive analytics dashboard with portfolio summary, metrics, and performance data.',
+  })
+  @ApiQuery({ name: 'startDate', required: false, type: String })
+  @ApiQuery({ name: 'endDate', required: false, type: String })
+  @ApiQuery({ name: 'propertyIds', required: false, type: String })
+  @ApiQuery({ name: 'dealIds', required: false, type: String })
+  @ApiQuery({ name: 'status', required: false, type: String })
+  @ApiResponse({ status: 200, description: 'Dashboard data retrieved successfully' })
+  async getDashboard(@Query() query: any, @Request() req: any) {
     const options: AggregationOptions = {
       startDate: query.startDate,
       endDate: query.endDate,
@@ -37,7 +60,7 @@ export class AnalyticsController {
       return cached;
     }
 
-    const dashboard = await this.analyticsService.getDashboard(options);
+    const dashboard = await this.analyticsService.getDashboard(options, req.user.organizationId);
     this.cacheService.set(cacheKey, dashboard);
 
     return dashboard;
@@ -48,7 +71,17 @@ export class AnalyticsController {
    * GET /api/analytics/portfolio/summary
    */
   @Get('portfolio/summary')
-  async getPortfolioSummary(@Query() query: any) {
+  @ApiOperation({
+    summary: 'Get portfolio summary',
+    description: 'Returns aggregated portfolio metrics and summary statistics.',
+  })
+  @ApiQuery({ name: 'startDate', required: false, type: String })
+  @ApiQuery({ name: 'endDate', required: false, type: String })
+  @ApiQuery({ name: 'propertyIds', required: false, type: String })
+  @ApiQuery({ name: 'dealIds', required: false, type: String })
+  @ApiQuery({ name: 'status', required: false, type: String })
+  @ApiResponse({ status: 200, description: 'Portfolio summary retrieved successfully' })
+  async getPortfolioSummary(@Query() query: any, @Request() req: any) {
     const options: AggregationOptions = {
       startDate: query.startDate,
       endDate: query.endDate,
@@ -66,7 +99,7 @@ export class AnalyticsController {
       return cached;
     }
 
-    const summary = await this.analyticsService.getPortfolioSummary(options);
+    const summary = await this.analyticsService.getPortfolioSummary(options, req.user.organizationId);
     this.cacheService.set(cacheKey, summary);
 
     return summary;
@@ -104,7 +137,15 @@ export class AnalyticsController {
    * GET /api/analytics/metrics/portfolio-growth
    */
   @Get('metrics/portfolio-growth')
-  async getPortfolioGrowth(@Query() query: any) {
+  @ApiOperation({
+    summary: 'Get portfolio growth',
+    description: 'Returns time-series data for portfolio growth over time.',
+  })
+  @ApiQuery({ name: 'startDate', required: false, type: String })
+  @ApiQuery({ name: 'endDate', required: false, type: String })
+  @ApiQuery({ name: 'propertyIds', required: false, type: String })
+  @ApiResponse({ status: 200, description: 'Portfolio growth retrieved successfully' })
+  async getPortfolioGrowth(@Query() query: any, @Request() req: any) {
     const options: AggregationOptions = {
       startDate: query.startDate,
       endDate: query.endDate,
@@ -120,7 +161,7 @@ export class AnalyticsController {
       return cached;
     }
 
-    const growth = await this.analyticsService.getPortfolioGrowth(options);
+    const growth = await this.analyticsService.getPortfolioGrowth(options, req.user.organizationId);
     this.cacheService.set(cacheKey, growth);
 
     return growth;
@@ -131,7 +172,16 @@ export class AnalyticsController {
    * GET /api/analytics/market/comparisons
    */
   @Get('market/comparisons')
-  async getMarketComparisons(@Query() query: any) {
+  @ApiOperation({
+    summary: 'Get market comparisons',
+    description: 'Returns market comparison data for properties and deals.',
+  })
+  @ApiQuery({ name: 'startDate', required: false, type: String })
+  @ApiQuery({ name: 'endDate', required: false, type: String })
+  @ApiQuery({ name: 'propertyIds', required: false, type: String })
+  @ApiQuery({ name: 'dealIds', required: false, type: String })
+  @ApiResponse({ status: 200, description: 'Market comparisons retrieved successfully' })
+  async getMarketComparisons(@Query() query: any, @Request() req: any) {
     const options: AggregationOptions = {
       startDate: query.startDate,
       endDate: query.endDate,
@@ -148,7 +198,7 @@ export class AnalyticsController {
       return cached;
     }
 
-    const comparisons = await this.analyticsService.getMarketComparisons(options);
+    const comparisons = await this.analyticsService.getMarketComparisons(options, req.user.organizationId);
     this.cacheService.set(cacheKey, comparisons);
 
     return comparisons;
@@ -159,7 +209,15 @@ export class AnalyticsController {
    * GET /api/analytics/properties/performance
    */
   @Get('properties/performance')
-  async getPropertyPerformance(@Query() query: any) {
+  @ApiOperation({
+    summary: 'Get property performance',
+    description: 'Returns performance metrics for properties.',
+  })
+  @ApiQuery({ name: 'startDate', required: false, type: String })
+  @ApiQuery({ name: 'endDate', required: false, type: String })
+  @ApiQuery({ name: 'propertyIds', required: false, type: String })
+  @ApiResponse({ status: 200, description: 'Property performance retrieved successfully' })
+  async getPropertyPerformance(@Query() query: any, @Request() req: any) {
     const options: AggregationOptions = {
       startDate: query.startDate,
       endDate: query.endDate,
@@ -175,7 +233,7 @@ export class AnalyticsController {
       return cached;
     }
 
-    const performance = await this.analyticsService.getPropertyPerformance(options);
+    const performance = await this.analyticsService.getPropertyPerformance(options, req.user.organizationId);
     this.cacheService.set(cacheKey, performance);
 
     return performance;
@@ -186,9 +244,20 @@ export class AnalyticsController {
    * GET /api/analytics/deals/rankings?limit=10
    */
   @Get('deals/rankings')
+  @ApiOperation({
+    summary: 'Get deal performance rankings',
+    description: 'Returns ranked list of deals by performance metrics.',
+  })
+  @ApiQuery({ name: 'limit', required: false, type: Number, description: 'Number of rankings to return' })
+  @ApiQuery({ name: 'startDate', required: false, type: String })
+  @ApiQuery({ name: 'endDate', required: false, type: String })
+  @ApiQuery({ name: 'propertyIds', required: false, type: String })
+  @ApiQuery({ name: 'status', required: false, type: String })
+  @ApiResponse({ status: 200, description: 'Deal rankings retrieved successfully' })
   async getDealRankings(
     @Query('limit') limit?: string,
-    @Query() query?: any
+    @Query() query?: any,
+    @Request() req?: any
   ) {
     const options: AggregationOptions = {
       startDate: query.startDate,
@@ -212,7 +281,8 @@ export class AnalyticsController {
 
     const rankings = await this.analyticsService.getDealPerformanceRankings(
       options,
-      limitNum
+      limitNum,
+      req?.user?.organizationId
     );
     this.cacheService.set(cacheKey, rankings);
 

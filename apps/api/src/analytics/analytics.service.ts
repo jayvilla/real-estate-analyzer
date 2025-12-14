@@ -28,10 +28,13 @@ export class AnalyticsService {
   /**
    * Get portfolio summary with aggregated metrics
    */
-  async getPortfolioSummary(options?: AggregationOptions): Promise<PortfolioSummary> {
+  async getPortfolioSummary(options?: AggregationOptions, organizationId?: string): Promise<PortfolioSummary> {
     try {
-      const properties = await this.propertyService.findAll(true);
-      const allDeals = await this.dealService.findAll();
+      if (!organizationId) {
+        throw new Error('Organization ID is required for portfolio summary');
+      }
+      const properties = await this.propertyService.findAll(organizationId, true);
+      const allDeals = await this.dealService.findAll(organizationId);
 
       // Filter by options if provided
       let deals = allDeals;
@@ -125,10 +128,14 @@ export class AnalyticsService {
    * Get time-series metrics for cash flow
    */
   async getCashFlowTrend(
-    options?: AggregationOptions
+    options?: AggregationOptions,
+    organizationId?: string
   ): Promise<TimeSeriesMetrics> {
     try {
-      const deals = await this.dealService.findAll();
+      if (!organizationId) {
+        throw new Error('Organization ID is required for cash flow trend');
+      }
+      const deals = await this.dealService.findAll(organizationId);
       const filteredDeals = this.filterDeals(deals, options);
 
       // Group by month
@@ -171,10 +178,14 @@ export class AnalyticsService {
    * Get portfolio growth over time
    */
   async getPortfolioGrowth(
-    options?: AggregationOptions
+    options?: AggregationOptions,
+    organizationId?: string
   ): Promise<TimeSeriesMetrics> {
     try {
-      const deals = await this.dealService.findAll();
+      if (!organizationId) {
+        throw new Error('Organization ID is required for portfolio growth');
+      }
+      const deals = await this.dealService.findAll(organizationId);
       const filteredDeals = this.filterDeals(deals, options);
 
       // Group by month and calculate cumulative cash invested
@@ -224,10 +235,14 @@ export class AnalyticsService {
    * Get market comparisons for deals
    */
   async getMarketComparisons(
-    options?: AggregationOptions
+    options?: AggregationOptions,
+    organizationId?: string
   ): Promise<MarketComparison[]> {
     try {
-      const deals = await this.dealService.findAll();
+      if (!organizationId) {
+        throw new Error('Organization ID is required for market comparisons');
+      }
+      const deals = await this.dealService.findAll(organizationId);
       const filteredDeals = this.filterDeals(deals, options);
 
       if (filteredDeals.length === 0) {
@@ -316,11 +331,15 @@ export class AnalyticsService {
    * Get property performance metrics
    */
   async getPropertyPerformance(
-    options?: AggregationOptions
+    options?: AggregationOptions,
+    organizationId?: string
   ): Promise<PropertyPerformance[]> {
     try {
-      const properties = await this.propertyService.findAll(true);
-      const allDeals = await this.dealService.findAll();
+      if (!organizationId) {
+        throw new Error('Organization ID is required for property performance');
+      }
+      const properties = await this.propertyService.findAll(organizationId, true);
+      const allDeals = await this.dealService.findAll(organizationId);
 
       const performance: PropertyPerformance[] = [];
 
@@ -415,12 +434,16 @@ export class AnalyticsService {
    */
   async getDealPerformanceRankings(
     options?: AggregationOptions,
-    limit: number = 10
+    limit: number = 10,
+    organizationId?: string
   ): Promise<DealPerformanceRanking[]> {
     try {
-      const deals = await this.dealService.findAll();
+      if (!organizationId) {
+        throw new Error('Organization ID is required for deal performance rankings');
+      }
+      const deals = await this.dealService.findAll(organizationId);
       const filteredDeals = this.filterDeals(deals, options);
-      const properties = await this.propertyService.findAll();
+      const properties = await this.propertyService.findAll(organizationId);
 
       const rankings: DealPerformanceRanking[] = [];
 
@@ -466,9 +489,13 @@ export class AnalyticsService {
    * Get complete analytics dashboard data
    */
   async getDashboard(
-    options?: AggregationOptions
+    options?: AggregationOptions,
+    organizationId?: string
   ): Promise<AnalyticsDashboard> {
     try {
+      if (!organizationId) {
+        throw new Error('Organization ID is required for dashboard');
+      }
       const [
         portfolioSummary,
         topPerformers,
@@ -478,20 +505,23 @@ export class AnalyticsService {
         marketComparisons,
         propertyPerformance,
       ] = await Promise.all([
-        this.getPortfolioSummary(options),
-        this.getDealPerformanceRankings(options, 10),
-        this.getDealPerformanceRankings(options, 10).then((rankings) =>
+        this.getPortfolioSummary(options, organizationId),
+        this.getDealPerformanceRankings(options, 10, organizationId),
+        this.getDealPerformanceRankings(options, 10, organizationId).then((rankings) =>
           rankings.reverse().slice(0, 10)
         ),
-        this.getCashFlowTrend(options),
-        this.getPortfolioGrowth(options),
-        this.getMarketComparisons(options),
-        this.getPropertyPerformance(options),
+        this.getCashFlowTrend(options, organizationId),
+        this.getPortfolioGrowth(options, organizationId),
+        this.getMarketComparisons(options, organizationId),
+        this.getPropertyPerformance(options, organizationId),
       ]);
 
       // Get recent activity (simplified - in production, would query event store)
-      const recentDeals = await this.dealService.findAll();
-      const recentProperties = await this.propertyService.findAll();
+      if (!organizationId) {
+        throw new Error('Organization ID is required for dashboard');
+      }
+      const recentDeals = await this.dealService.findAll(organizationId);
+      const recentProperties = await this.propertyService.findAll(organizationId);
 
       const recentActivity = [
         ...recentProperties.slice(0, 5).map((p) => ({
