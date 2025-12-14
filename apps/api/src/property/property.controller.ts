@@ -25,13 +25,16 @@ export class PropertyController {
   }
 
   @Get()
-  findAll() {
-    return this.propertyService.findAll();
+  findAll(@Query('includeDeals') includeDeals?: string) {
+    return this.propertyService.findAll(includeDeals === 'true');
   }
 
   @Get(':id')
-  findOne(@Param('id', ParseUUIDPipe) id: string) {
-    return this.propertyService.findOne(id);
+  findOne(
+    @Param('id', ParseUUIDPipe) id: string,
+    @Query('includeDeals') includeDeals?: string
+  ) {
+    return this.propertyService.findOne(id, includeDeals === 'true');
   }
 
   @Patch(':id')

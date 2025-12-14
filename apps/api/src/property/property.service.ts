@@ -96,13 +96,14 @@ export class PropertyService {
     }
   }
 
-  async findAll(): Promise<PropertyEntity[]> {
+  async findAll(includeDeals = false): Promise<PropertyEntity[]> {
     const startTime = Date.now();
     
     this.logger.debug('Finding all properties', 'PropertyService');
 
     try {
       const properties = await this.propertyRepository.find({
+        relations: includeDeals ? ['deals'] : [],
         order: { createdAt: 'DESC' },
       });
       const duration = Date.now() - startTime;
@@ -130,11 +131,14 @@ export class PropertyService {
     }
   }
 
-  async findOne(id: string): Promise<PropertyEntity> {
+  async findOne(id: string, includeDeals = false): Promise<PropertyEntity> {
     this.logger.debug(`Finding property with ID: ${id}`, 'PropertyService');
 
     try {
-      const property = await this.propertyRepository.findOne({ where: { id } });
+      const property = await this.propertyRepository.findOne({
+        where: { id },
+        relations: includeDeals ? ['deals'] : [],
+      });
 
       if (!property) {
         this.logger.warn(

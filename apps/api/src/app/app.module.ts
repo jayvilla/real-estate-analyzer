@@ -6,6 +6,7 @@ import { AppService } from './app.service';
 import { DatabaseModule } from '../database/database.module';
 import { PropertyModule } from '../property/property.module';
 import { DealModule } from '../deal/deal.module';
+import { ValuationModule } from '../valuation/valuation.module';
 import { LoggingModule } from '../common/logging/logging.module';
 import { LoggingInterceptor } from '../common/interceptors/logging.interceptor';
 import { HttpExceptionFilter } from '../common/filters/http-exception.filter';
@@ -18,6 +19,7 @@ import { ValuationSaga } from '../workflows/valuation.saga';
     EventEmitterModule.forRoot(),
     PropertyModule,
     DealModule,
+    ValuationModule,
     LoggingModule, // Global logging module
   ],
   controllers: [AppController],
