@@ -28,18 +28,19 @@ export class DealService {
     private readonly requestContext: RequestContextService
   ) {}
 
-  async create(createDealDto: CreateDealDto): Promise<DealEntity> {
+  async create(createDealDto: CreateDealDto, organizationId: string): Promise<DealEntity> {
     const startTime = Date.now();
 
     try {
-      // Verify property exists
-      await this.propertyService.findOne(createDealDto.propertyId);
+      // Verify property exists and get organizationId
+      const property = await this.propertyService.findOne(createDealDto.propertyId, organizationId);
 
       this.logger.logWithMetadata(
         'info',
         `Creating deal for property ${createDealDto.propertyId}`,
         {
           propertyId: createDealDto.propertyId,
+          organizationId,
           purchasePrice: createDealDto.purchasePrice,
           loanType: createDealDto.loanType,
         },
@@ -73,6 +74,7 @@ export class DealService {
         downPayment,
         loanAmount,
         status: createDealDto.status || DealStatus.DRAFT,
+        organizationId,
       });
 
       const savedDeal = await this.dealRepository.save(deal);
@@ -137,9 +139,10 @@ export class DealService {
     }
   }
 
-  async findAll(): Promise<DealEntity[]> {
+  async findAll(organizationId: string): Promise<DealEntity[]> {
     try {
       return await this.dealRepository.find({
+        where: { organizationId },
         relations: ['property'],
         order: { createdAt: 'DESC' },
       });
@@ -166,10 +169,10 @@ export class DealService {
     }
   }
 
-  async findByPropertyId(propertyId: string): Promise<DealEntity[]> {
+  async findByPropertyId(propertyId: string, organizationId: string): Promise<DealEntity[]> {
     try {
       return await this.dealRepository.find({
-        where: { propertyId },
+        where: { propertyId, organizationId },
         relations: ['property'],
         order: { createdAt: 'DESC' },
       });
@@ -198,10 +201,10 @@ export class DealService {
     }
   }
 
-  async findOne(id: string): Promise<DealEntity> {
+  async findOne(id: string, organizationId: string): Promise<DealEntity> {
     try {
       const deal = await this.dealRepository.findOne({
-        where: { id },
+        where: { id, organizationId },
         relations: ['property'],
       });
 
@@ -245,11 +248,11 @@ export class DealService {
     }
   }
 
-  async update(id: string, updateDealDto: UpdateDealDto): Promise<DealEntity> {
+  async update(id: string, updateDealDto: UpdateDealDto, organizationId: string): Promise<DealEntity> {
     const startTime = Date.now();
 
     try {
-      const deal = await this.findOne(id);
+      const deal = await this.findOne(id, organizationId);
 
       // Recalculate total acquisition cost if purchase price or costs changed
       if (
@@ -376,7 +379,7 @@ export class DealService {
     const startTime = Date.now();
 
     try {
-      const deal = await this.findOne(id);
+      const deal = await this.findOne(id, organizationId);
       await this.dealRepository.remove(deal);
 
       const duration = Date.now() - startTime;

@@ -14,6 +14,8 @@ import {
 import { DealService } from './deal.service';
 import { CreateDealDto } from './dto/create-deal.dto';
 import { UpdateDealDto } from './dto/update-deal.dto';
+import { CurrentUser } from '../auth/decorators/current-user.decorator';
+import { CurrentUserData } from '../auth/decorators/current-user.decorator';
 
 @Controller('deals')
 export class DealController {
@@ -21,35 +23,48 @@ export class DealController {
 
   @Post()
   @HttpCode(HttpStatus.CREATED)
-  create(@Body() createDealDto: CreateDealDto) {
-    return this.dealService.create(createDealDto);
+  create(
+    @Body() createDealDto: CreateDealDto,
+    @CurrentUser() user: CurrentUserData
+  ) {
+    return this.dealService.create(createDealDto, user.organizationId);
   }
 
   @Get()
-  findAll(@Query('propertyId') propertyId?: string) {
+  findAll(
+    @Query('propertyId') propertyId?: string,
+    @CurrentUser() user?: CurrentUserData
+  ) {
     if (propertyId) {
-      return this.dealService.findByPropertyId(propertyId);
+      return this.dealService.findByPropertyId(propertyId, user.organizationId);
     }
-    return this.dealService.findAll();
+    return this.dealService.findAll(user.organizationId);
   }
 
   @Get(':id')
-  findOne(@Param('id', ParseUUIDPipe) id: string) {
-    return this.dealService.findOne(id);
+  findOne(
+    @Param('id', ParseUUIDPipe) id: string,
+    @CurrentUser() user: CurrentUserData
+  ) {
+    return this.dealService.findOne(id, user.organizationId);
   }
 
   @Patch(':id')
   update(
     @Param('id', ParseUUIDPipe) id: string,
-    @Body() updateDealDto: UpdateDealDto
+    @Body() updateDealDto: UpdateDealDto,
+    @CurrentUser() user: CurrentUserData
   ) {
-    return this.dealService.update(id, updateDealDto);
+    return this.dealService.update(id, updateDealDto, user.organizationId);
   }
 
   @Delete(':id')
   @HttpCode(HttpStatus.NO_CONTENT)
-  remove(@Param('id', ParseUUIDPipe) id: string) {
-    return this.dealService.remove(id);
+  remove(
+    @Param('id', ParseUUIDPipe) id: string,
+    @CurrentUser() user: CurrentUserData
+  ) {
+    return this.dealService.remove(id, user.organizationId);
   }
 }
 

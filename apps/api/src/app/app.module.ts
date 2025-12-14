@@ -1,5 +1,5 @@
 import { Module, MiddlewareConsumer, NestModule } from '@nestjs/common';
-import { APP_INTERCEPTOR, APP_FILTER } from '@nestjs/core';
+import { APP_INTERCEPTOR, APP_FILTER, APP_GUARD } from '@nestjs/core';
 import { EventEmitterModule } from '@nestjs/event-emitter';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
@@ -12,15 +12,18 @@ import { HandlersModule } from '../handlers/handlers.module';
 import { EventStoreModule } from '../common/event-store/event-store.module';
 import { ContextModule } from '../common/context/context.module';
 import { LoggingModule } from '../common/logging/logging.module';
+import { AuthModule } from '../auth/auth.module';
 import { LoggingInterceptor } from '../common/interceptors/logging.interceptor';
 import { HttpExceptionFilter } from '../common/filters/http-exception.filter';
 import { CorrelationIdMiddleware } from '../common/middleware/correlation-id.middleware';
+import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { ValuationSaga } from '../workflows/valuation.saga';
 
 @Module({
   imports: [
     DatabaseModule,
     EventEmitterModule.forRoot(),
+    AuthModule, // Authentication and authorization
     PropertyModule,
     DealModule,
     ValuationModule,
@@ -41,6 +44,10 @@ import { ValuationSaga } from '../workflows/valuation.saga';
     {
       provide: APP_FILTER,
       useClass: HttpExceptionFilter,
+    },
+    {
+      provide: APP_GUARD,
+      useClass: JwtAuthGuard, // Global JWT guard (can be bypassed with @Public())
     },
   ],
 })

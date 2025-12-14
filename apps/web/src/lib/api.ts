@@ -10,6 +10,9 @@ import {
   PropertyPerformance,
   DealPerformanceRanking,
   AggregationOptions,
+  LoginDto,
+  RegisterDto,
+  AuthResponse,
 } from '@real-estate-analyzer/types';
 
 const apiClient = axios.create({
@@ -18,6 +21,38 @@ const apiClient = axios.create({
     'Content-Type': 'application/json',
   },
 });
+
+// Add request interceptor to include auth token
+apiClient.interceptors.request.use(
+  (config) => {
+    if (typeof window !== 'undefined') {
+      const token = localStorage.getItem('auth_token');
+      if (token) {
+        config.headers.Authorization = `Bearer ${token}`;
+      }
+    }
+    return config;
+  },
+  (error) => {
+    return Promise.reject(error);
+  }
+);
+
+// Add response interceptor to handle 401 errors
+apiClient.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    if (error.response?.status === 401 && typeof window !== 'undefined') {
+      localStorage.removeItem('auth_token');
+      localStorage.removeItem('auth_user');
+      // Redirect to login if not already there
+      if (window.location.pathname !== '/login' && window.location.pathname !== '/register') {
+        window.location.href = '/login';
+      }
+    }
+    return Promise.reject(error);
+  }
+);
 
 export const propertyApi = {
   getAll: async (): Promise<Property[]> => {
@@ -121,6 +156,53 @@ export const analyticsApi = {
     
     const response = await apiClient.get<DealPerformanceRanking[]>(`/analytics/deals/rankings?${params.toString()}`);
     return response.data;
+  },
+};
+
+export const authApi = {
+  login: async (credentials: LoginDto): Promise<AuthResponse> => {
+    const response = await apiClient.post<AuthResponse>('/auth/login', credentials);
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('auth_token', response.data.accessToken);
+      localStorage.setItem('auth_user', JSON.stringify(response.data.user));
+    }
+    return response.data;
+  },
+
+  register: async (data: RegisterDto): Promise<AuthResponse> => {
+    const response = await apiClient.post<AuthResponse>('/auth/register', data);
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('auth_token', response.data.accessToken);
+      localStorage.setItem('auth_user', JSON.stringify(response.data.user));
+    }
+    return response.data;
+  },
+
+  logout: (): void => {
+    if (typeof window !== 'undefined') {
+      localStorage.removeItem('auth_token');
+      localStorage.removeItem('auth_user');
+    }
+  },
+
+  getCurrentUser: (): AuthResponse['user'] | null => {
+    if (typeof window === 'undefined') return null;
+    const userStr = localStorage.getItem('auth_user');
+    if (!userStr) return null;
+    try {
+      return JSON.parse(userStr);
+    } catch {
+      return null;
+    }
+  },
+
+  getToken: (): string | null => {
+    if (typeof window === 'undefined') return null;
+    return localStorage.getItem('auth_token');
+  },
+
+  isAuthenticated: (): boolean => {
+    return !!authApi.getToken();
   },
 };
 

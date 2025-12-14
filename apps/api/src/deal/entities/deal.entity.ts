@@ -8,6 +8,7 @@ import {
   JoinColumn,
 } from 'typeorm';
 import { PropertyEntity } from '../../property/entities/property.entity';
+import { OrganizationEntity } from '../../organization/entities/organization.entity';
 import { LoanType, DealStatus } from '@real-estate-analyzer/types';
 
 @Entity('deals')
@@ -17,6 +18,13 @@ export class DealEntity {
 
   @Column({ type: 'uuid' })
   propertyId!: string;
+
+  @Column({ type: 'uuid' })
+  organizationId!: string;
+
+  @ManyToOne(() => OrganizationEntity, { onDelete: 'CASCADE' })
+  @JoinColumn({ name: 'organizationId' })
+  organization?: OrganizationEntity;
 
   @ManyToOne(() => PropertyEntity, { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'propertyId' })

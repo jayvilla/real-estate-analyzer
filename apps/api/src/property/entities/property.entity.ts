@@ -5,9 +5,12 @@ import {
   CreateDateColumn,
   UpdateDateColumn,
   OneToMany,
+  ManyToOne,
+  JoinColumn,
 } from 'typeorm';
 import { PropertyType } from '@real-estate-analyzer/types';
 import { DealEntity } from '../../deal/entities/deal.entity';
+import { OrganizationEntity } from '../../organization/entities/organization.entity';
 
 @Entity('properties')
 export class PropertyEntity {
@@ -52,6 +55,13 @@ export class PropertyEntity {
 
   @Column({ type: 'decimal', precision: 12, scale: 2, nullable: true })
   currentValue?: number;
+
+  @Column({ type: 'uuid' })
+  organizationId!: string;
+
+  @ManyToOne(() => OrganizationEntity, { onDelete: 'CASCADE' })
+  @JoinColumn({ name: 'organizationId' })
+  organization?: OrganizationEntity;
 
   @OneToMany(() => DealEntity, (deal) => deal.property)
   deals?: DealEntity[];

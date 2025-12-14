@@ -4,3 +4,4 @@ export * from './lib/deal.js';
 export * from './lib/valuation.js';
 export * from './lib/analytics.js';
 export * from './lib/errors.js';
+export * from './lib/auth.js';

@@ -20,7 +20,7 @@ export class PropertyService {
     private readonly requestContext: RequestContextService
   ) {}
 
-  async create(createPropertyDto: CreatePropertyDto): Promise<PropertyEntity> {
+  async create(createPropertyDto: CreatePropertyDto, organizationId: string): Promise<PropertyEntity> {
     const startTime = Date.now();
     
     this.logger.log(
@@ -31,12 +31,16 @@ export class PropertyService {
           address: createPropertyDto.address,
           city: createPropertyDto.city,
           propertyType: createPropertyDto.propertyType,
+          organizationId,
         },
       }
     );
 
     try {
-      const property = this.propertyRepository.create(createPropertyDto);
+      const property = this.propertyRepository.create({
+        ...createPropertyDto,
+        organizationId,
+      });
       const savedProperty = await this.propertyRepository.save(property);
       const duration = Date.now() - startTime;
 
@@ -99,13 +103,14 @@ export class PropertyService {
     }
   }
 
-  async findAll(includeDeals = false): Promise<PropertyEntity[]> {
+  async findAll(organizationId: string, includeDeals = false): Promise<PropertyEntity[]> {
     const startTime = Date.now();
     
-    this.logger.debug('Finding all properties', 'PropertyService');
+    this.logger.debug(`Finding all properties for organization: ${organizationId}`, 'PropertyService');
 
     try {
       const properties = await this.propertyRepository.find({
+        where: { organizationId },
         relations: includeDeals ? ['deals'] : [],
         order: { createdAt: 'DESC' },
       });
@@ -134,12 +139,12 @@ export class PropertyService {
     }
   }
 
-  async findOne(id: string, includeDeals = false): Promise<PropertyEntity> {
-    this.logger.debug(`Finding property with ID: ${id}`, 'PropertyService');
+  async findOne(id: string, organizationId: string, includeDeals = false): Promise<PropertyEntity> {
+    this.logger.debug(`Finding property with ID: ${id} for organization: ${organizationId}`, 'PropertyService');
 
     try {
       const property = await this.propertyRepository.findOne({
-        where: { id },
+        where: { id, organizationId },
         relations: includeDeals ? ['deals'] : [],
       });
 
@@ -182,18 +187,19 @@ export class PropertyService {
 
   async update(
     id: string,
-    updatePropertyDto: UpdatePropertyDto
+    updatePropertyDto: UpdatePropertyDto,
+    organizationId: string
   ): Promise<PropertyEntity> {
     const startTime = Date.now();
     
     this.logger.log(
       `Updating property with ID: ${id}`,
       'PropertyService',
-      { metadata: { propertyId: id } }
+      { metadata: { propertyId: id, organizationId } }
     );
 
     try {
-      const property = await this.findOne(id);
+      const property = await this.findOne(id, organizationId);
       Object.assign(property, updatePropertyDto);
 
       const updatedProperty = await this.propertyRepository.save(property);
@@ -227,17 +233,17 @@ export class PropertyService {
     }
   }
 
-  async remove(id: string): Promise<void> {
+  async remove(id: string, organizationId: string): Promise<void> {
     const startTime = Date.now();
     
     this.logger.log(
       `Removing property with ID: ${id}`,
       'PropertyService',
-      { metadata: { propertyId: id } }
+      { metadata: { propertyId: id, organizationId } }
     );
 
     try {
-      const property = await this.findOne(id);
+      const property = await this.findOne(id, organizationId);
       await this.propertyRepository.remove(property);
       const duration = Date.now() - startTime;
 
