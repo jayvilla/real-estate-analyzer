@@ -93,7 +93,10 @@ async function bootstrap() {
     .addServer('https://api.realestateanalyzer.com', 'Production server')
     .build();
 
-  const document = SwaggerModule.createDocument(app, config);
+  const document = SwaggerModule.createDocument(app, config, {
+    operationIdFactory: (controllerKey: string, methodKey: string) => methodKey,
+    deepScanRoutes: true,
+  });
   SwaggerModule.setup('api/docs', app, document, {
     customSiteTitle: 'Real Estate Analyzer API Docs',
     customCss: '.swagger-ui .topbar { display: none }',
@@ -104,6 +107,8 @@ async function bootstrap() {
       filter: true,
       showExtensions: true,
       showCommonExtensions: true,
+      defaultModelsExpandDepth: 2,
+      defaultModelExpandDepth: 2,
     },
   });
 
