@@ -15,6 +15,7 @@ import { LoggingModule } from '../common/logging/logging.module';
 import { AuthModule } from '../auth/auth.module';
 import { ScoringModule } from '../scoring/scoring.module';
 import { MarketModule } from '../market/market.module';
+import { LLMModule } from '../llm/llm.module';
 import { LoggingInterceptor } from '../common/interceptors/logging.interceptor';
 import { HttpExceptionFilter } from '../common/filters/http-exception.filter';
 import { CorrelationIdMiddleware } from '../common/middleware/correlation-id.middleware';
@@ -36,6 +37,7 @@ import { ValuationSaga } from '../workflows/valuation.saga';
     LoggingModule, // Global logging module
     ScoringModule, // Deal scoring and analysis
     MarketModule, // Market trend analysis
+    LLMModule, // LLM-assisted insights
   ],
   controllers: [AppController],
   providers: [

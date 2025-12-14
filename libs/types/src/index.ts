@@ -7,3 +7,4 @@ export * from './lib/errors.js';
 export * from './lib/auth.js';
 export * from './lib/scoring.js';
 export * from './lib/market.js';
+export * from './lib/llm.js';

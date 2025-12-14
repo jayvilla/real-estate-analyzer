@@ -23,6 +23,13 @@ import {
   MarketHeatMapData,
   MarketAlert,
   MarketAnalysisOptions,
+  PropertyAnalysis,
+  DealRecommendation,
+  RiskAssessment,
+  InvestmentStrategy,
+  MarketCommentary,
+  PropertyDescription,
+  PortfolioInsight,
 } from '@real-estate-analyzer/types';
 
 const apiClient = axios.create({
@@ -300,6 +307,51 @@ export const marketApi = {
 
   checkAndCreateAlerts: async (zipCode: string): Promise<MarketAlert[]> => {
     const response = await apiClient.post<MarketAlert[]>(`/market/alerts/check/${zipCode}`);
+    return response.data;
+  },
+};
+
+export const llmApi = {
+  analyzeProperty: async (propertyId: string): Promise<PropertyAnalysis> => {
+    const response = await apiClient.get<PropertyAnalysis>(`/llm/property/${propertyId}/analysis`);
+    return response.data;
+  },
+
+  getDealRecommendation: async (dealId: string): Promise<DealRecommendation> => {
+    const response = await apiClient.get<DealRecommendation>(`/llm/deal/${dealId}/recommendation`);
+    return response.data;
+  },
+
+  assessRisk: async (propertyId?: string, dealId?: string): Promise<RiskAssessment> => {
+    const params = new URLSearchParams();
+    if (propertyId) params.append('propertyId', propertyId);
+    if (dealId) params.append('dealId', dealId);
+    const response = await apiClient.get<RiskAssessment>(`/llm/risk?${params.toString()}`);
+    return response.data;
+  },
+
+  getInvestmentStrategy: async (): Promise<InvestmentStrategy> => {
+    const response = await apiClient.get<InvestmentStrategy>('/llm/strategy');
+    return response.data;
+  },
+
+  generateMarketCommentary: async (zipCode: string): Promise<MarketCommentary> => {
+    const response = await apiClient.get<MarketCommentary>(`/llm/market/${zipCode}/commentary`);
+    return response.data;
+  },
+
+  generatePropertyDescription: async (propertyId: string): Promise<PropertyDescription> => {
+    const response = await apiClient.get<PropertyDescription>(`/llm/property/${propertyId}/description`);
+    return response.data;
+  },
+
+  getPortfolioInsights: async (): Promise<PortfolioInsight[]> => {
+    const response = await apiClient.get<PortfolioInsight[]>('/llm/portfolio/insights');
+    return response.data;
+  },
+
+  checkHealth: async (): Promise<{ available: boolean; provider: string; models: string[] }> => {
+    const response = await apiClient.get('/llm/health');
     return response.data;
   },
 };
