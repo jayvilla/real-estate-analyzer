@@ -208,6 +208,49 @@ export class LLMController {
   }
 
   /**
+   * Assess risk for property or deal (shorter alias)
+   */
+  @Get('risk')
+  @ApiOperation({
+    summary: 'Assess investment risk (alias)',
+    description: `
+      Alias for /api/llm/risk-assessment. Performs comprehensive risk assessment for a property or deal.
+      Provide either propertyId or dealId as query parameters.
+    `,
+  })
+  @ApiQuery({
+    name: 'propertyId',
+    required: false,
+    description: 'Property ID for risk assessment',
+    type: String,
+  })
+  @ApiQuery({
+    name: 'dealId',
+    required: false,
+    description: 'Deal ID for risk assessment',
+    type: String,
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Risk assessment completed',
+  })
+  @ApiResponse({
+    status: 400,
+    description: 'Bad request - Must provide either propertyId or dealId',
+  })
+  async assessRiskShort(
+    @Query('propertyId') propertyId: string | undefined,
+    @Query('dealId') dealId: string | undefined,
+    @Request() req: any
+  ): Promise<RiskAssessment> {
+    return this.llmService.assessRisk(
+      propertyId,
+      dealId,
+      req.user.organizationId
+    );
+  }
+
+  /**
    * Get investment strategy suggestions
    */
   @Get('investment-strategy')

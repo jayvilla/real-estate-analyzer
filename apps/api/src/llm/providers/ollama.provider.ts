@@ -68,7 +68,8 @@ export class OllamaProvider implements ILLMProvider {
       // Convert messages to Ollama format
       const prompt = this.formatMessagesToPrompt(request.messages);
 
-      const response = await this.client.post('/api/generate', {
+      // Build request payload
+      const payload: any = {
         model,
         prompt,
         stream: request.stream || false,
@@ -76,7 +77,15 @@ export class OllamaProvider implements ILLMProvider {
           temperature: request.temperature || 0.7,
           num_predict: request.maxTokens || 2048,
         },
-      });
+      };
+
+      // Only add format: 'json' if the model supports it (llama3.2+)
+      // For older models, we'll rely on prompt engineering and JSON extraction
+      if (model.includes('3.2') || model.includes('3.1') || model.includes('mistral') || model.includes('mixtral')) {
+        payload.format = 'json';
+      }
+
+      const response = await this.client.post('/api/generate', payload);
 
       const duration = Date.now() - startTime;
 

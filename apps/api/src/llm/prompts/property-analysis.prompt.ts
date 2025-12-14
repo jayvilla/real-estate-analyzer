@@ -34,7 +34,9 @@ ${marketTrend ? `MARKET TREND:
 - 1-Year Appreciation: ${marketTrend.priceChange1Year?.toFixed(2) || 'N/A'}%
 ` : ''}
 
-Please provide a comprehensive analysis in the following JSON format:
+IMPORTANT: You must respond with ONLY valid JSON. Do not include any explanatory text before or after the JSON. Start your response with { and end with }.
+
+Return your analysis in this exact JSON format:
 {
   "summary": "Brief 2-3 sentence summary of the property",
   "strengths": ["strength1", "strength2", "strength3"],
@@ -52,6 +54,6 @@ Please provide a comprehensive analysis in the following JSON format:
   ]
 }
 
-Be specific, data-driven, and focus on investment potential.`;
+Be specific, data-driven, and focus on investment potential. Remember: respond with ONLY the JSON object, no other text.`;
 }
 

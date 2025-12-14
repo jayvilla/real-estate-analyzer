@@ -203,7 +203,7 @@ export class LLMService {
     try {
       const properties = await this.propertyService.findAll(organizationId, false);
       const deals = await this.dealService.findAll(organizationId);
-      const portfolioMetrics = await this.analyticsService.getPortfolioSummary({});
+      const portfolioMetrics = await this.analyticsService.getPortfolioSummary({}, organizationId);
 
       const prompt = buildInvestmentStrategyPrompt(properties, deals, portfolioMetrics);
       const response = await this.generateWithCache(prompt);
@@ -240,10 +240,17 @@ export class LLMService {
   /**
    * Generate market commentary
    */
-  async generateMarketCommentary(zipCode: string): Promise<MarketCommentary> {
+  async getMarketCommentary(
+    zipCode: string | undefined,
+    organizationId?: string
+  ): Promise<MarketCommentary> {
     const startTime = Date.now();
 
     try {
+      if (!zipCode) {
+        throw new Error('Zip code is required for market commentary');
+      }
+
       const trend = await this.marketService.getMarketTrend(zipCode);
       const prompt = buildMarketCommentaryPrompt(trend);
       const response = await this.generateWithCache(prompt);
@@ -256,6 +263,7 @@ export class LLMService {
         `Market commentary generated for ${zipCode}`,
         {
           zipCode,
+          organizationId,
           duration,
           provider: this.llmProvider.getName(),
         },
@@ -271,7 +279,7 @@ export class LLMService {
         `Failed to generate market commentary: ${error instanceof Error ? error.message : 'Unknown error'}`,
         error instanceof Error ? error.stack : undefined,
         'LLMService',
-        { zipCode }
+        { zipCode, organizationId }
       );
       throw error;
     }
@@ -331,8 +339,8 @@ export class LLMService {
     try {
       const properties = await this.propertyService.findAll(organizationId, false);
       const deals = await this.dealService.findAll(organizationId);
-      const portfolioMetrics = await this.analyticsService.getPortfolioSummary({});
-      const dashboard = await this.analyticsService.getDashboard({});
+      const portfolioMetrics = await this.analyticsService.getPortfolioSummary({}, organizationId);
+      const dashboard = await this.analyticsService.getDashboard({}, organizationId);
 
       const prompt = buildPortfolioInsightPrompt(
         properties,
@@ -415,25 +423,159 @@ export class LLMService {
   }
 
   /**
-   * Parse JSON response from LLM, handling markdown code blocks
+   * Parse JSON response from LLM, handling markdown code blocks and extracting JSON from text
    */
   private parseJSONResponse<T>(content: string): T {
     try {
-      // Remove markdown code blocks if present
       let cleaned = content.trim();
-      if (cleaned.startsWith('```json')) {
-        cleaned = cleaned.replace(/^```json\n?/, '').replace(/\n?```$/, '');
-      } else if (cleaned.startsWith('```')) {
-        cleaned = cleaned.replace(/^```\n?/, '').replace(/\n?```$/, '');
+      
+      // Log the raw content for debugging (first 500 chars)
+      this.logger.debug(
+        `Parsing LLM response`,
+        'LLMService',
+        { contentPreview: cleaned.substring(0, 500) }
+      );
+      
+      // Remove markdown code blocks if present
+      if (cleaned.includes('```json')) {
+        const jsonBlockMatch = cleaned.match(/```json\s*([\s\S]*?)\s*```/i);
+        if (jsonBlockMatch) {
+          cleaned = jsonBlockMatch[1].trim();
+        }
+      } else if (cleaned.includes('```')) {
+        const codeBlockMatch = cleaned.match(/```[a-z]*\s*([\s\S]*?)\s*```/i);
+        if (codeBlockMatch) {
+          cleaned = codeBlockMatch[1].trim();
+        }
       }
 
-      return JSON.parse(cleaned) as T;
+      // Try to parse directly first
+      try {
+        return JSON.parse(cleaned) as T;
+      } catch (directParseError) {
+        // If direct parse fails, try to extract JSON from text
+        // Look for JSON object pattern: { ... } - use non-greedy matching with balanced braces
+        let jsonMatch: RegExpMatchArray | null = null;
+        let braceCount = 0;
+        let startIndex = -1;
+        
+        // Find the first { and track balanced braces
+        for (let i = 0; i < cleaned.length; i++) {
+          if (cleaned[i] === '{') {
+            if (startIndex === -1) startIndex = i;
+            braceCount++;
+          } else if (cleaned[i] === '}') {
+            braceCount--;
+            if (braceCount === 0 && startIndex !== -1) {
+              jsonMatch = [cleaned.substring(startIndex, i + 1)];
+              break;
+            }
+          }
+        }
+        
+        if (jsonMatch && jsonMatch[0]) {
+          try {
+            return JSON.parse(jsonMatch[0]) as T;
+          } catch (extractError) {
+            // Try to find JSON array pattern: [ ... ]
+            let arrayMatch: RegExpMatchArray | null = null;
+            let bracketCount = 0;
+            let arrayStartIndex = -1;
+            
+            for (let i = 0; i < cleaned.length; i++) {
+              if (cleaned[i] === '[') {
+                if (arrayStartIndex === -1) arrayStartIndex = i;
+                bracketCount++;
+              } else if (cleaned[i] === ']') {
+                bracketCount--;
+                if (bracketCount === 0 && arrayStartIndex !== -1) {
+                  arrayMatch = [cleaned.substring(arrayStartIndex, i + 1)];
+                  break;
+                }
+              }
+            }
+            
+            if (arrayMatch && arrayMatch[0]) {
+              return JSON.parse(arrayMatch[0]) as T;
+            }
+            throw extractError;
+          }
+        }
+        
+        // Last resort: try multiple strategies to find JSON
+        // Strategy 1: Find all potential JSON objects and try each one
+        const allJsonCandidates: string[] = [];
+        let currentBraceCount = 0;
+        let candidateStart = -1;
+        
+        for (let i = 0; i < cleaned.length; i++) {
+          const char = cleaned[i];
+          if (char === '{') {
+            if (currentBraceCount === 0) {
+              candidateStart = i;
+            }
+            currentBraceCount++;
+          } else if (char === '}') {
+            currentBraceCount--;
+            if (currentBraceCount === 0 && candidateStart !== -1) {
+              allJsonCandidates.push(cleaned.substring(candidateStart, i + 1));
+              candidateStart = -1;
+            }
+          }
+        }
+        
+        // Try each candidate from largest to smallest
+        for (const candidate of allJsonCandidates.sort((a, b) => b.length - a.length)) {
+          try {
+            return JSON.parse(candidate) as T;
+          } catch {
+            // Try next candidate
+            continue;
+          }
+        }
+        
+        // Strategy 2: Try to find JSON after common prefixes
+        const prefixes = ['Here is', 'Here\'s', 'Analysis:', 'Result:', 'Response:', 'JSON:'];
+        for (const prefix of prefixes) {
+          const prefixIndex = cleaned.toLowerCase().indexOf(prefix.toLowerCase());
+          if (prefixIndex !== -1) {
+            const afterPrefix = cleaned.substring(prefixIndex + prefix.length).trim();
+            const colonIndex = afterPrefix.indexOf(':');
+            const jsonStart = colonIndex !== -1 ? afterPrefix.substring(colonIndex + 1).trim() : afterPrefix;
+            
+            // Try to find JSON in this section
+            for (let i = 0; i < jsonStart.length; i++) {
+              if (jsonStart[i] === '{') {
+                let braceCount = 0;
+                let startIdx = i;
+                for (let j = i; j < jsonStart.length; j++) {
+                  if (jsonStart[j] === '{') braceCount++;
+                  if (jsonStart[j] === '}') braceCount--;
+                  if (braceCount === 0 && j > i) {
+                    try {
+                      return JSON.parse(jsonStart.substring(startIdx, j + 1)) as T;
+                    } catch {
+                      break;
+                    }
+                  }
+                }
+                break;
+              }
+            }
+          }
+        }
+        
+        throw directParseError;
+      }
     } catch (error) {
       this.logger.error(
         `Failed to parse LLM JSON response: ${error instanceof Error ? error.message : 'Unknown error'}`,
         error instanceof Error ? error.stack : undefined,
         'LLMService',
-        { content: content.substring(0, 200) }
+        { 
+          contentPreview: content.substring(0, 1000),
+          contentLength: content.length
+        }
       );
       throw new Error(`Invalid JSON response from LLM: ${error instanceof Error ? error.message : 'Unknown error'}`);
     }
