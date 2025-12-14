@@ -15,6 +15,14 @@ import {
   AuthResponse,
   DealScore,
   ScoringWeights,
+  MarketTrend,
+  NeighborhoodAnalysis,
+  RentalMarketTrend,
+  AppreciationPrediction,
+  ComparativeMarketAnalysis,
+  MarketHeatMapData,
+  MarketAlert,
+  MarketAnalysisOptions,
 } from '@real-estate-analyzer/types';
 
 const apiClient = axios.create({
@@ -238,6 +246,61 @@ export const scoringApi = {
 
   updateScoringConfiguration: async (weights: ScoringWeights): Promise<void> => {
     await apiClient.post('/scoring/configuration', weights);
+  },
+};
+
+export const marketApi = {
+  getMarketTrend: async (zipCode: string, options?: MarketAnalysisOptions): Promise<MarketTrend> => {
+    const params = new URLSearchParams();
+    if (options?.startDate) params.append('startDate', options.startDate);
+    if (options?.endDate) params.append('endDate', options.endDate);
+    if (options?.propertyType) params.append('propertyType', options.propertyType);
+    if (options?.includePredictions) params.append('includePredictions', 'true');
+    
+    const response = await apiClient.get<MarketTrend>(`/market/trends/${zipCode}?${params.toString()}`);
+    return response.data;
+  },
+
+  getNeighborhoodAnalysis: async (zipCode: string): Promise<NeighborhoodAnalysis> => {
+    const response = await apiClient.get<NeighborhoodAnalysis>(`/market/neighborhood/${zipCode}`);
+    return response.data;
+  },
+
+  getRentalMarketTrend: async (zipCode: string): Promise<RentalMarketTrend> => {
+    const response = await apiClient.get<RentalMarketTrend>(`/market/rental/${zipCode}`);
+    return response.data;
+  },
+
+  getAppreciationPrediction: async (zipCode: string, currentValue: number): Promise<AppreciationPrediction> => {
+    const params = new URLSearchParams();
+    params.append('currentValue', currentValue.toString());
+    const response = await apiClient.get<AppreciationPrediction>(`/market/appreciation/${zipCode}?${params.toString()}`);
+    return response.data;
+  },
+
+  generateCMA: async (propertyId: string): Promise<ComparativeMarketAnalysis> => {
+    const response = await apiClient.get<ComparativeMarketAnalysis>(`/market/cma/${propertyId}`);
+    return response.data;
+  },
+
+  getMarketHeatMap: async (state?: string, city?: string): Promise<MarketHeatMapData[]> => {
+    const params = new URLSearchParams();
+    if (state) params.append('state', state);
+    if (city) params.append('city', city);
+    const response = await apiClient.get<MarketHeatMapData[]>(`/market/heatmap?${params.toString()}`);
+    return response.data;
+  },
+
+  getMarketAlerts: async (isRead?: boolean): Promise<MarketAlert[]> => {
+    const params = new URLSearchParams();
+    if (isRead !== undefined) params.append('isRead', isRead.toString());
+    const response = await apiClient.get<MarketAlert[]>(`/market/alerts?${params.toString()}`);
+    return response.data;
+  },
+
+  checkAndCreateAlerts: async (zipCode: string): Promise<MarketAlert[]> => {
+    const response = await apiClient.post<MarketAlert[]>(`/market/alerts/check/${zipCode}`);
+    return response.data;
   },
 };
 

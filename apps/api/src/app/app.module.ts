@@ -14,6 +14,7 @@ import { ContextModule } from '../common/context/context.module';
 import { LoggingModule } from '../common/logging/logging.module';
 import { AuthModule } from '../auth/auth.module';
 import { ScoringModule } from '../scoring/scoring.module';
+import { MarketModule } from '../market/market.module';
 import { LoggingInterceptor } from '../common/interceptors/logging.interceptor';
 import { HttpExceptionFilter } from '../common/filters/http-exception.filter';
 import { CorrelationIdMiddleware } from '../common/middleware/correlation-id.middleware';
@@ -34,6 +35,7 @@ import { ValuationSaga } from '../workflows/valuation.saga';
     ContextModule, // Request context service
     LoggingModule, // Global logging module
     ScoringModule, // Deal scoring and analysis
+    MarketModule, // Market trend analysis
   ],
   controllers: [AppController],
   providers: [

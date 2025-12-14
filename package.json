@@ -15,6 +15,7 @@
     "db:migrate:deals": "PGPASSWORD=postgres psql -h localhost -p 5433 -U postgres -d real_estate_analyzer -f apps/api/src/migrations/create-deals-table.sql",
     "db:migrate:auth": "PGPASSWORD=postgres psql -h localhost -p 5433 -U postgres -d real_estate_analyzer -f apps/api/src/migrations/create-auth-tables.sql",
     "db:migrate:scoring": "PGPASSWORD=postgres psql -h localhost -p 5433 -U postgres -d real_estate_analyzer -f apps/api/src/migrations/create-scoring-tables.sql",
+    "db:migrate:market": "PGPASSWORD=postgres psql -h localhost -p 5433 -U postgres -d real_estate_analyzer -f apps/api/src/migrations/create-market-tables.sql",
     "test:logging": "bash apps/api/test-logging.sh",
     "test:errors": "bash apps/api/test-error-standardization.sh",
     "test:valuation": "bash apps/api/test-valuation.sh",
