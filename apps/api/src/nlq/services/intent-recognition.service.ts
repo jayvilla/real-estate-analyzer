@@ -160,8 +160,20 @@ Be specific and extract all relevant entities.`;
     let intent = QueryIntent.UNKNOWN;
     const entities: ExtractedEntity[] = [];
 
-    // Simple pattern matching
-    if (lowerQuery.includes('find') || lowerQuery.includes('search') || lowerQuery.includes('show me')) {
+    // Check for metric queries (max, min, average, what's the, etc.)
+    const metricKeywords = ['max', 'maximum', 'min', 'minimum', 'average', 'avg', 'mean', 'total', 'sum', 'count'];
+    const hasMetricKeyword = metricKeywords.some(keyword => lowerQuery.includes(keyword));
+    const hasMetricTerm = lowerQuery.includes('cap rate') || lowerQuery.includes('caprate') || 
+                          lowerQuery.includes('roi') || lowerQuery.includes('cash flow') ||
+                          lowerQuery.includes('cash on cash') || lowerQuery.includes('coc') ||
+                          lowerQuery.includes('return') || lowerQuery.includes('dscr');
+    
+    if (hasMetricKeyword && hasMetricTerm) {
+      intent = QueryIntent.ANALYZE;
+    } else if (hasMetricKeyword || lowerQuery.includes("what's") || lowerQuery.includes("what is") || 
+               lowerQuery.includes("how much") || lowerQuery.includes("how many")) {
+      intent = QueryIntent.ANALYZE;
+    } else if (lowerQuery.includes('find') || lowerQuery.includes('search') || lowerQuery.includes('show me')) {
       intent = QueryIntent.SEARCH;
     } else if (lowerQuery.includes('filter') || lowerQuery.includes('where') || lowerQuery.includes('with')) {
       intent = QueryIntent.FILTER;
@@ -169,7 +181,7 @@ Be specific and extract all relevant entities.`;
       intent = QueryIntent.ANALYZE;
     } else if (lowerQuery.includes('compare') || lowerQuery.includes('vs') || lowerQuery.includes('versus')) {
       intent = QueryIntent.COMPARE;
-    } else if (lowerQuery.includes('calculate') || lowerQuery.includes('what is') || lowerQuery.includes('how much')) {
+    } else if (lowerQuery.includes('calculate') || lowerQuery.includes('compute')) {
       intent = QueryIntent.CALCULATE;
     } else if (lowerQuery.includes('list') || lowerQuery.includes('all')) {
       intent = QueryIntent.LIST;
@@ -195,6 +207,85 @@ Be specific and extract all relevant entities.`;
         value: 'deal',
         confidence: 0.8,
         originalText: dealMatch[0],
+      });
+    }
+
+    // Extract metric entities
+    if (lowerQuery.includes('cap rate') || lowerQuery.includes('caprate')) {
+      entities.push({
+        type: EntityType.METRIC,
+        value: 'cap rate',
+        confidence: 0.9,
+        originalText: 'cap rate',
+      });
+    }
+    if (lowerQuery.includes('cash on cash') || lowerQuery.includes('coc')) {
+      entities.push({
+        type: EntityType.METRIC,
+        value: 'cash on cash',
+        confidence: 0.9,
+        originalText: 'cash on cash',
+      });
+    }
+    if (lowerQuery.includes('roi') || lowerQuery.includes('return on investment')) {
+      entities.push({
+        type: EntityType.METRIC,
+        value: 'roi',
+        confidence: 0.9,
+        originalText: 'roi',
+      });
+    }
+    if (lowerQuery.includes('cash flow')) {
+      entities.push({
+        type: EntityType.METRIC,
+        value: 'cash flow',
+        confidence: 0.9,
+        originalText: 'cash flow',
+      });
+    }
+
+    // Extract location entities (US states)
+    const usStates = [
+      'alabama', 'alaska', 'arizona', 'arkansas', 'california', 'colorado', 'connecticut', 'delaware',
+      'florida', 'georgia', 'hawaii', 'idaho', 'illinois', 'indiana', 'iowa', 'kansas', 'kentucky',
+      'louisiana', 'maine', 'maryland', 'massachusetts', 'michigan', 'minnesota', 'mississippi', 'missouri',
+      'montana', 'nebraska', 'nevada', 'new hampshire', 'new jersey', 'new mexico', 'new york', 'north carolina',
+      'north dakota', 'ohio', 'oklahoma', 'oregon', 'pennsylvania', 'rhode island', 'south carolina',
+      'south dakota', 'tennessee', 'texas', 'utah', 'vermont', 'virginia', 'washington', 'west virginia',
+      'wisconsin', 'wyoming'
+    ];
+    
+    for (const state of usStates) {
+      if (lowerQuery.includes(state)) {
+        entities.push({
+          type: EntityType.LOCATION,
+          value: state,
+          confidence: 0.9,
+          originalText: state,
+        });
+        break;
+      }
+    }
+
+    // Extract state abbreviations
+    const stateAbbrMatch = query.match(/\b([A-Z]{2})\b/);
+    if (stateAbbrMatch && !lowerQuery.includes('zip') && !lowerQuery.includes('code')) {
+      entities.push({
+        type: EntityType.LOCATION,
+        value: stateAbbrMatch[1],
+        confidence: 0.8,
+        originalText: stateAbbrMatch[1],
+      });
+    }
+
+    // Extract city names (common pattern: "in [City]" or "in [City], [State]")
+    const inCityMatch = query.match(/\bin\s+([A-Z][a-z]+(?:\s+[A-Z][a-z]+)?)/i);
+    if (inCityMatch && !usStates.includes(inCityMatch[1].toLowerCase())) {
+      entities.push({
+        type: EntityType.LOCATION,
+        value: inCityMatch[1],
+        confidence: 0.7,
+        originalText: inCityMatch[1],
       });
     }
 

@@ -91,9 +91,21 @@ export class QueryBuilderService {
     // Add sorting if specified
     this.buildSorting(query, intentResult, originalQuery);
 
-    // Add aggregations for analyze intent
-    if (query.intent === QueryIntent.ANALYZE) {
+    // Add aggregations for analyze intent or if metric entities are present
+    if (query.intent === QueryIntent.ANALYZE || resolvedEntities.has(EntityType.METRIC)) {
       query.aggregations = this.extractAggregations(originalQuery);
+      
+      // If we have a metric entity, add it as a filter for easier access
+      if (resolvedEntities.has(EntityType.METRIC)) {
+        const metrics = resolvedEntities.get(EntityType.METRIC)!;
+        if (metrics.length > 0) {
+          query.filters.push({
+            field: 'metric',
+            operator: 'eq',
+            value: metrics[0].value,
+          });
+        }
+      }
     }
 
     return query;
@@ -103,15 +115,22 @@ export class QueryBuilderService {
    * Determine primary entity type
    */
   private determineEntity(resolvedEntities: Map<EntityType, any[]>): EntityType | null {
-    // Priority: property > deal > metric
+    // If we have a metric entity, default to DEAL since metrics are calculated on deals
+    if (resolvedEntities.has(EntityType.METRIC)) {
+      // But if we also have property entities, prefer property
+      if (resolvedEntities.has(EntityType.PROPERTY)) {
+        return EntityType.PROPERTY;
+      }
+      // For metric queries, we need deals to calculate metrics
+      return EntityType.DEAL;
+    }
+    
+    // Priority: property > deal
     if (resolvedEntities.has(EntityType.PROPERTY)) {
       return EntityType.PROPERTY;
     }
     if (resolvedEntities.has(EntityType.DEAL)) {
       return EntityType.DEAL;
-    }
-    if (resolvedEntities.has(EntityType.METRIC)) {
-      return EntityType.METRIC;
     }
     return null;
   }
@@ -152,18 +171,71 @@ export class QueryBuilderService {
     // Filter by location
     if (resolvedEntities.has(EntityType.LOCATION)) {
       const locations = resolvedEntities.get(EntityType.LOCATION)!;
+      const usStates = [
+        'alabama', 'alaska', 'arizona', 'arkansas', 'california', 'colorado', 'connecticut', 'delaware',
+        'florida', 'georgia', 'hawaii', 'idaho', 'illinois', 'indiana', 'iowa', 'kansas', 'kentucky',
+        'louisiana', 'maine', 'maryland', 'massachusetts', 'michigan', 'minnesota', 'mississippi', 'missouri',
+        'montana', 'nebraska', 'nevada', 'new hampshire', 'new jersey', 'new mexico', 'new york', 'north carolina',
+        'north dakota', 'ohio', 'oklahoma', 'oregon', 'pennsylvania', 'rhode island', 'south carolina',
+        'south dakota', 'tennessee', 'texas', 'utah', 'vermont', 'virginia', 'washington', 'west virginia',
+        'wisconsin', 'wyoming'
+      ];
+      const stateAbbreviations: Record<string, string> = {
+        'al': 'alabama', 'ak': 'alaska', 'az': 'arizona', 'ar': 'arkansas', 'ca': 'california', 'co': 'colorado',
+        'ct': 'connecticut', 'de': 'delaware', 'fl': 'florida', 'ga': 'georgia', 'hi': 'hawaii', 'id': 'idaho',
+        'il': 'illinois', 'in': 'indiana', 'ia': 'iowa', 'ks': 'kansas', 'ky': 'kentucky', 'la': 'louisiana',
+        'me': 'maine', 'md': 'maryland', 'ma': 'massachusetts', 'mi': 'michigan', 'mn': 'minnesota', 'ms': 'mississippi',
+        'mo': 'missouri', 'mt': 'montana', 'ne': 'nebraska', 'nv': 'nevada', 'nh': 'new hampshire', 'nj': 'new jersey',
+        'nm': 'new mexico', 'ny': 'new york', 'nc': 'north carolina', 'nd': 'north dakota', 'oh': 'ohio', 'ok': 'oklahoma',
+        'or': 'oregon', 'pa': 'pennsylvania', 'ri': 'rhode island', 'sc': 'south carolina', 'sd': 'south dakota',
+        'tn': 'tennessee', 'tx': 'texas', 'ut': 'utah', 'vt': 'vermont', 'va': 'virginia', 'wa': 'washington',
+        'wv': 'west virginia', 'wi': 'wisconsin', 'wy': 'wyoming'
+      };
+      
       locations.forEach((loc) => {
-        // Try to match city, state, or zipCode
         const lowerValue = loc.value.toLowerCase();
+        
+        // Check if it's a zip code
         if (lowerValue.match(/^\d{5}$/)) {
-          // Zip code
           query.filters.push({
             field: 'zipCode',
             operator: 'eq',
             value: loc.value,
           });
-        } else {
-          // City or state
+        } 
+        // Check if it's a state abbreviation (2 letters)
+        else if (loc.value.length === 2 && stateAbbreviations[lowerValue]) {
+          query.filters.push({
+            field: 'state',
+            operator: 'eq',
+            value: loc.value.toUpperCase(),
+          });
+        }
+        // Check if it's a full state name
+        else if (usStates.includes(lowerValue)) {
+          // Map state name to abbreviation
+          const stateMap: Record<string, string> = {
+            'alabama': 'AL', 'alaska': 'AK', 'arizona': 'AZ', 'arkansas': 'AR', 'california': 'CA', 'colorado': 'CO',
+            'connecticut': 'CT', 'delaware': 'DE', 'florida': 'FL', 'georgia': 'GA', 'hawaii': 'HI', 'idaho': 'ID',
+            'illinois': 'IL', 'indiana': 'IN', 'iowa': 'IA', 'kansas': 'KS', 'kentucky': 'KY', 'louisiana': 'LA',
+            'maine': 'ME', 'maryland': 'MD', 'massachusetts': 'MA', 'michigan': 'MI', 'minnesota': 'MN', 'mississippi': 'MS',
+            'missouri': 'MO', 'montana': 'MT', 'nebraska': 'NE', 'nevada': 'NV', 'new hampshire': 'NH', 'new jersey': 'NJ',
+            'new mexico': 'NM', 'new york': 'NY', 'north carolina': 'NC', 'north dakota': 'ND', 'ohio': 'OH', 'oklahoma': 'OK',
+            'oregon': 'OR', 'pennsylvania': 'PA', 'rhode island': 'RI', 'south carolina': 'SC', 'south dakota': 'SD',
+            'tennessee': 'TN', 'texas': 'TX', 'utah': 'UT', 'vermont': 'VT', 'virginia': 'VA', 'washington': 'WA',
+            'west virginia': 'WV', 'wisconsin': 'WI', 'wyoming': 'WY'
+          };
+          const stateAbbr = stateMap[lowerValue];
+          if (stateAbbr) {
+            query.filters.push({
+              field: 'state',
+              operator: 'eq',
+              value: stateAbbr,
+            });
+          }
+        } 
+        // Otherwise assume it's a city
+        else {
           query.filters.push({
             field: 'city',
             operator: 'like',
