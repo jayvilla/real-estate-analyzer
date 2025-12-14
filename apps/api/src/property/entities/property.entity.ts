@@ -4,8 +4,10 @@ import {
   Column,
   CreateDateColumn,
   UpdateDateColumn,
+  OneToMany,
 } from 'typeorm';
 import { PropertyType } from '@real-estate-analyzer/types';
+import { DealEntity } from '../../deal/entities/deal.entity';
 
 @Entity('properties')
 export class PropertyEntity {
@@ -50,6 +52,9 @@ export class PropertyEntity {
 
   @Column({ type: 'decimal', precision: 12, scale: 2, nullable: true })
   currentValue?: number;
+
+  @OneToMany(() => DealEntity, (deal) => deal.property)
+  deals?: DealEntity[];
 
   @CreateDateColumn()
   createdAt!: Date;

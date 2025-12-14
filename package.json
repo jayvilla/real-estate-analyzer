@@ -12,6 +12,7 @@
     "db:reset": "docker-compose down -v && docker-compose up -d",
     "db:migrate": "PGPASSWORD=postgres psql -h localhost -p 5433 -U postgres -d real_estate_analyzer -f apps/api/src/migrations/init.sql",
     "db:migrate:update-enum": "PGPASSWORD=postgres psql -h localhost -p 5433 -U postgres -d real_estate_analyzer -f apps/api/src/migrations/update-property-type-enum.sql",
+    "db:migrate:deals": "PGPASSWORD=postgres psql -h localhost -p 5433 -U postgres -d real_estate_analyzer -f apps/api/src/migrations/create-deals-table.sql",
     "test:logging": "bash apps/api/test-logging.sh",
     "test:errors": "bash apps/api/test-error-standardization.sh"
   },
