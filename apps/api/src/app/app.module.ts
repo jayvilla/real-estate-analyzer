@@ -7,6 +7,7 @@ import { DatabaseModule } from '../database/database.module';
 import { PropertyModule } from '../property/property.module';
 import { DealModule } from '../deal/deal.module';
 import { ValuationModule } from '../valuation/valuation.module';
+import { AnalyticsModule } from '../analytics/analytics.module';
 import { HandlersModule } from '../handlers/handlers.module';
 import { EventStoreModule } from '../common/event-store/event-store.module';
 import { ContextModule } from '../common/context/context.module';
@@ -23,6 +24,7 @@ import { ValuationSaga } from '../workflows/valuation.saga';
     PropertyModule,
     DealModule,
     ValuationModule,
+    AnalyticsModule, // Analytics and reporting
     HandlersModule, // Event handlers
     EventStoreModule, // Event store for idempotency
     ContextModule, // Request context service

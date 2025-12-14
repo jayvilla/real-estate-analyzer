@@ -5,6 +5,8 @@ import { StructuredLoggerService } from '../common/logging/structured-logger.ser
 import { EventStoreService } from '../common/event-store/event-store.service';
 import { ValuationRecalculationRequestedEvent } from '../events/valuation-recalculation-requested.event';
 import { EventEmitter2 } from '@nestjs/event-emitter';
+import { AnalyticsCacheService } from '../analytics/cache/analytics-cache.service';
+import { AnalyticsCacheService } from '../analytics/cache/analytics-cache.service';
 
 /**
  * Handler for DealCreated events
@@ -15,7 +17,8 @@ export class DealCreatedHandler {
   constructor(
     private readonly logger: StructuredLoggerService,
     private readonly eventStore: EventStoreService,
-    private readonly eventEmitter: EventEmitter2
+    private readonly eventEmitter: EventEmitter2,
+    private readonly cacheService: AnalyticsCacheService
   ) {}
 
   @OnEvent('deal.created')
@@ -57,6 +60,9 @@ export class DealCreatedHandler {
       );
 
       this.eventEmitter.emit('valuation.recalculation.requested', recalculationEvent);
+
+      // Invalidate analytics cache
+      this.cacheService.invalidatePattern('analytics:.*');
 
       this.logger.logWithMetadata(
         'info',
