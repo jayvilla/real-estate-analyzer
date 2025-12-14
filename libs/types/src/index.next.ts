@@ -6,4 +6,5 @@ export * from './lib/valuation';
 export * from './lib/analytics';
 export * from './lib/errors';
 export * from './lib/auth';
+export * from './lib/scoring';
 

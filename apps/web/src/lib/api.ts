@@ -13,6 +13,8 @@ import {
   LoginDto,
   RegisterDto,
   AuthResponse,
+  DealScore,
+  ScoringWeights,
 } from '@real-estate-analyzer/types';
 
 const apiClient = axios.create({
@@ -203,6 +205,39 @@ export const authApi = {
 
   isAuthenticated: (): boolean => {
     return !!authApi.getToken();
+  },
+};
+
+export const scoringApi = {
+  calculateDealScore: async (dealId: string): Promise<DealScore> => {
+    const response = await apiClient.post<DealScore>(`/scoring/deals/${dealId}/calculate`);
+    return response.data;
+  },
+
+  getDealScore: async (dealId: string): Promise<DealScore | null> => {
+    const response = await apiClient.get<DealScore | null>(`/scoring/deals/${dealId}`);
+    return response.data;
+  },
+
+  getDealScoreHistory: async (dealId: string): Promise<DealScore[]> => {
+    const response = await apiClient.get<DealScore[]>(`/scoring/deals/${dealId}/history`);
+    return response.data;
+  },
+
+  compareDealScores: async (dealIds: string[]): Promise<Record<string, DealScore>> => {
+    const params = new URLSearchParams();
+    params.append('dealIds', dealIds.join(','));
+    const response = await apiClient.get<Record<string, DealScore>>(`/scoring/deals/compare?${params.toString()}`);
+    return response.data;
+  },
+
+  getScoringConfiguration: async (): Promise<ScoringWeights> => {
+    const response = await apiClient.get<ScoringWeights>('/scoring/configuration');
+    return response.data;
+  },
+
+  updateScoringConfiguration: async (weights: ScoringWeights): Promise<void> => {
+    await apiClient.post('/scoring/configuration', weights);
   },
 };
 

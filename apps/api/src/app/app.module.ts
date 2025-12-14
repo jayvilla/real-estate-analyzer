@@ -13,6 +13,7 @@ import { EventStoreModule } from '../common/event-store/event-store.module';
 import { ContextModule } from '../common/context/context.module';
 import { LoggingModule } from '../common/logging/logging.module';
 import { AuthModule } from '../auth/auth.module';
+import { ScoringModule } from '../scoring/scoring.module';
 import { LoggingInterceptor } from '../common/interceptors/logging.interceptor';
 import { HttpExceptionFilter } from '../common/filters/http-exception.filter';
 import { CorrelationIdMiddleware } from '../common/middleware/correlation-id.middleware';
@@ -32,6 +33,7 @@ import { ValuationSaga } from '../workflows/valuation.saga';
     EventStoreModule, // Event store for idempotency
     ContextModule, // Request context service
     LoggingModule, // Global logging module
+    ScoringModule, // Deal scoring and analysis
   ],
   controllers: [AppController],
   providers: [

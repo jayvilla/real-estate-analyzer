@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Inject, forwardRef } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { EventEmitter2 } from '@nestjs/event-emitter';
@@ -16,6 +16,7 @@ import { DealStatus } from '@real-estate-analyzer/types';
 import { DealCreatedEvent } from '../events/deal-created.event';
 import { DealUpdatedEvent } from '../events/deal-updated.event';
 import { RequestContextService } from '../common/context/request-context.service';
+import { ScoringService } from '../scoring/scoring.service';
 
 @Injectable()
 export class DealService {
@@ -25,7 +26,9 @@ export class DealService {
     private readonly propertyService: PropertyService,
     private readonly eventEmitter: EventEmitter2,
     private readonly logger: StructuredLoggerService,
-    private readonly requestContext: RequestContextService
+    private readonly requestContext: RequestContextService,
+    @Inject(forwardRef(() => ScoringService))
+    private readonly scoringService?: ScoringService // Optional to avoid circular dependency
   ) {}
 
   async create(createDealDto: CreateDealDto, organizationId: string): Promise<DealEntity> {
@@ -78,6 +81,19 @@ export class DealService {
       });
 
       const savedDeal = await this.dealRepository.save(deal);
+
+      // Calculate deal score asynchronously (don't block on this)
+      if (this.scoringService) {
+        this.scoringService
+          .calculateDealScore(savedDeal, organizationId)
+          .catch((error) => {
+            this.logger.warn(
+              `Failed to calculate deal score: ${error.message}`,
+              DealService.name,
+              { dealId: savedDeal.id }
+            );
+          });
+      }
 
       // Emit event for event-driven architecture
       const correlationId = this.requestContext.getCorrelationId();
@@ -315,6 +331,22 @@ export class DealService {
 
       Object.assign(deal, updateDealDto);
       const updatedDeal = await this.dealRepository.save(deal);
+
+      // Recalculate deal score if financial fields changed (async, don't block)
+      const hasFinancialChanges = Object.keys(previousValues).some(
+        (key) => previousValues[key as keyof DealEntity] !== undefined
+      );
+      if (this.scoringService && hasFinancialChanges) {
+        this.scoringService
+          .calculateDealScore(updatedDeal, organizationId)
+          .catch((error) => {
+            this.logger.warn(
+              `Failed to recalculate deal score: ${error.message}`,
+              DealService.name,
+              { dealId: updatedDeal.id }
+            );
+          });
+      }
 
       // Emit event for event-driven architecture
       const correlationId = this.requestContext.getCorrelationId();
