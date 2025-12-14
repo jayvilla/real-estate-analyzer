@@ -435,5 +435,74 @@ export const summaryApi = {
   },
 };
 
+export const aiInfrastructureApi = {
+  // API Keys
+  storeAPIKey: async (provider: string, apiKey: string, name?: string): Promise<any> => {
+    const response = await apiClient.post('/ai-infrastructure/api-keys', {
+      provider,
+      apiKey,
+      name,
+    });
+    return response.data;
+  },
+
+  listAPIKeys: async (): Promise<any[]> => {
+    const response = await apiClient.get('/ai-infrastructure/api-keys');
+    return response.data;
+  },
+
+  deleteAPIKey: async (id: string): Promise<void> => {
+    await apiClient.delete(`/ai-infrastructure/api-keys/${id}`);
+  },
+
+  // Cost Tracking
+  getCostSummary: async (startDate?: string, endDate?: string): Promise<any> => {
+    const params = new URLSearchParams();
+    if (startDate) params.append('startDate', startDate);
+    if (endDate) params.append('endDate', endDate);
+    const response = await apiClient.get(`/ai-infrastructure/costs/summary?${params.toString()}`);
+    return response.data;
+  },
+
+  getUsageAnalytics: async (feature?: string, startDate?: string, endDate?: string): Promise<any[]> => {
+    const params = new URLSearchParams();
+    if (feature) params.append('feature', feature);
+    if (startDate) params.append('startDate', startDate);
+    if (endDate) params.append('endDate', endDate);
+    const response = await apiClient.get(`/ai-infrastructure/costs/analytics?${params.toString()}`);
+    return response.data;
+  },
+
+  // Feature Flags
+  listFeatureFlags: async (): Promise<any[]> => {
+    const response = await apiClient.get('/ai-infrastructure/feature-flags');
+    return response.data;
+  },
+
+  checkFeatureFlag: async (name: string): Promise<{ enabled: boolean }> => {
+    const response = await apiClient.get(`/ai-infrastructure/feature-flags/${name}`);
+    return response.data;
+  },
+
+  // AB Tests
+  getActiveTests: async (): Promise<any[]> => {
+    const response = await apiClient.get('/ai-infrastructure/ab-tests');
+    return response.data;
+  },
+
+  getVariant: async (testId: string): Promise<{ variantId: string | null }> => {
+    const response = await apiClient.get(`/ai-infrastructure/ab-tests/${testId}/variant`);
+    return response.data;
+  },
+
+  trackMetric: async (testId: string, variantId: string, metric: string, value: number): Promise<void> => {
+    await apiClient.post(`/ai-infrastructure/ab-tests/${testId}/metrics`, {
+      variantId,
+      metric,
+      value,
+    });
+  },
+};
+
 export default apiClient;
 
