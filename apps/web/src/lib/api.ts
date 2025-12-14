@@ -33,6 +33,13 @@ import {
   QueryResult,
   QueryHistory,
   QuerySuggestion,
+  SummaryGenerationOptions,
+  PortfolioSummaryReport,
+  PropertyPerformanceSummary,
+  DealAnalysisSummary,
+  MarketReport,
+  ExecutiveDashboardSummary,
+  SummaryTemplate,
 } from '@real-estate-analyzer/types';
 
 const apiClient = axios.create({
@@ -374,6 +381,56 @@ export const nlqApi = {
   getSuggestions: async (limit?: number): Promise<QuerySuggestion[]> => {
     const params = limit ? `?limit=${limit}` : '';
     const response = await apiClient.get<QuerySuggestion[]>(`/nlq/suggestions${params}`);
+    return response.data;
+  },
+};
+
+export const summaryApi = {
+  generatePortfolioSummary: async (options: SummaryGenerationOptions): Promise<PortfolioSummaryReport> => {
+    const response = await apiClient.post<PortfolioSummaryReport>('/summary/portfolio', options);
+    return response.data;
+  },
+
+  generatePropertySummary: async (propertyId: string, options: SummaryGenerationOptions): Promise<PropertyPerformanceSummary> => {
+    const response = await apiClient.post<PropertyPerformanceSummary>(`/summary/property/${propertyId}`, options);
+    return response.data;
+  },
+
+  generateDealSummary: async (dealId: string, options: SummaryGenerationOptions): Promise<DealAnalysisSummary> => {
+    const response = await apiClient.post<DealAnalysisSummary>(`/summary/deal/${dealId}`, options);
+    return response.data;
+  },
+
+  generateMarketReport: async (zipCode: string, options: SummaryGenerationOptions): Promise<MarketReport> => {
+    const response = await apiClient.post<MarketReport>(`/summary/market/${zipCode}`, options);
+    return response.data;
+  },
+
+  generateExecutiveSummary: async (options: SummaryGenerationOptions): Promise<ExecutiveDashboardSummary> => {
+    const response = await apiClient.post<ExecutiveDashboardSummary>('/summary/executive', options);
+    return response.data;
+  },
+
+  generatePDF: async (summary: any): Promise<Blob> => {
+    const response = await apiClient.post('/summary/pdf', { summary }, { responseType: 'blob' });
+    return response.data;
+  },
+
+  sendEmailReport: async (summary: any, recipients: string[], subject?: string): Promise<void> => {
+    await apiClient.post('/summary/email', { summary, recipients, subject });
+  },
+
+  getTemplates: async (type?: string, format?: string, language?: string): Promise<SummaryTemplate[]> => {
+    const params = new URLSearchParams();
+    if (type) params.append('type', type);
+    if (format) params.append('format', format);
+    if (language) params.append('language', language);
+    const response = await apiClient.get<SummaryTemplate[]>(`/summary/templates?${params.toString()}`);
+    return response.data;
+  },
+
+  getTemplate: async (id: string): Promise<SummaryTemplate | null> => {
+    const response = await apiClient.get<SummaryTemplate | null>(`/summary/templates/${id}`);
     return response.data;
   },
 };
