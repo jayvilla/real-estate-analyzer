@@ -76,7 +76,7 @@ export function PropertyForm({
     <form onSubmit={handleSubmit} className="space-y-4">
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">
+          <label className="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1">
             Address *
           </label>
           <input
@@ -85,12 +85,12 @@ export function PropertyForm({
             value={formData.address}
             onChange={handleChange}
             required
-            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="w-full px-3 py-2 border border-neutral-300 dark:border-neutral-600 rounded-md focus:outline-none focus:ring-2 focus:ring-brand-primary-500/50 bg-white dark:bg-neutral-800 text-neutral-900 dark:text-neutral-50"
           />
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">
+          <label className="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1">
             City *
           </label>
           <input
@@ -99,12 +99,12 @@ export function PropertyForm({
             value={formData.city}
             onChange={handleChange}
             required
-            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="w-full px-3 py-2 border border-neutral-300 dark:border-neutral-600 rounded-md focus:outline-none focus:ring-2 focus:ring-brand-primary-500/50 bg-white dark:bg-neutral-800 text-neutral-900 dark:text-neutral-50"
           />
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">
+          <label className="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1">
             State *
           </label>
           <input
@@ -114,12 +114,12 @@ export function PropertyForm({
             onChange={handleChange}
             required
             maxLength={2}
-            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="w-full px-3 py-2 border border-neutral-300 dark:border-neutral-600 rounded-md focus:outline-none focus:ring-2 focus:ring-brand-primary-500/50 bg-white dark:bg-neutral-800 text-neutral-900 dark:text-neutral-50"
           />
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">
+          <label className="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1">
             ZIP Code *
           </label>
           <input
@@ -128,12 +128,12 @@ export function PropertyForm({
             value={formData.zipCode}
             onChange={handleChange}
             required
-            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="w-full px-3 py-2 border border-neutral-300 dark:border-neutral-600 rounded-md focus:outline-none focus:ring-2 focus:ring-brand-primary-500/50 bg-white dark:bg-neutral-800 text-neutral-900 dark:text-neutral-50"
           />
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">
+          <label className="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1">
             Property Type *
           </label>
           <select
@@ -141,7 +141,7 @@ export function PropertyForm({
             value={formData.propertyType}
             onChange={handleChange}
             required
-            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="w-full px-3 py-2 border border-neutral-300 dark:border-neutral-600 rounded-md focus:outline-none focus:ring-2 focus:ring-brand-primary-500/50 bg-white dark:bg-neutral-800 text-neutral-900 dark:text-neutral-50"
           >
             {propertyTypeOptions.map((type) => (
               <option key={type} value={type}>
@@ -152,7 +152,7 @@ export function PropertyForm({
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">
+          <label className="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1">
             Bedrooms
           </label>
           <input
@@ -161,12 +161,12 @@ export function PropertyForm({
             value={formData.bedrooms}
             onChange={handleChange}
             min="0"
-            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="w-full px-3 py-2 border border-neutral-300 dark:border-neutral-600 rounded-md focus:outline-none focus:ring-2 focus:ring-brand-primary-500/50 bg-white dark:bg-neutral-800 text-neutral-900 dark:text-neutral-50"
           />
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">
+          <label className="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1">
             Bathrooms
           </label>
           <input
@@ -176,12 +176,12 @@ export function PropertyForm({
             onChange={handleChange}
             min="0"
             step="0.5"
-            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="w-full px-3 py-2 border border-neutral-300 dark:border-neutral-600 rounded-md focus:outline-none focus:ring-2 focus:ring-brand-primary-500/50 bg-white dark:bg-neutral-800 text-neutral-900 dark:text-neutral-50"
           />
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">
+          <label className="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1">
             Square Feet
           </label>
           <input
@@ -190,12 +190,12 @@ export function PropertyForm({
             value={formData.squareFeet}
             onChange={handleChange}
             min="0"
-            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="w-full px-3 py-2 border border-neutral-300 dark:border-neutral-600 rounded-md focus:outline-none focus:ring-2 focus:ring-brand-primary-500/50 bg-white dark:bg-neutral-800 text-neutral-900 dark:text-neutral-50"
           />
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">
+          <label className="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1">
             Lot Size (sq ft)
           </label>
           <input
@@ -204,12 +204,12 @@ export function PropertyForm({
             value={formData.lotSize}
             onChange={handleChange}
             min="0"
-            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="w-full px-3 py-2 border border-neutral-300 dark:border-neutral-600 rounded-md focus:outline-none focus:ring-2 focus:ring-brand-primary-500/50 bg-white dark:bg-neutral-800 text-neutral-900 dark:text-neutral-50"
           />
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">
+          <label className="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1">
             Year Built
           </label>
           <input
@@ -219,12 +219,12 @@ export function PropertyForm({
             onChange={handleChange}
             min="1800"
             max={new Date().getFullYear()}
-            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="w-full px-3 py-2 border border-neutral-300 dark:border-neutral-600 rounded-md focus:outline-none focus:ring-2 focus:ring-brand-primary-500/50 bg-white dark:bg-neutral-800 text-neutral-900 dark:text-neutral-50"
           />
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">
+          <label className="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1">
             Purchase Price ($)
           </label>
           <input
@@ -234,7 +234,7 @@ export function PropertyForm({
             onChange={handleChange}
             min="0"
             step="1000"
-            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="w-full px-3 py-2 border border-neutral-300 dark:border-neutral-600 rounded-md focus:outline-none focus:ring-2 focus:ring-brand-primary-500/50 bg-white dark:bg-neutral-800 text-neutral-900 dark:text-neutral-50"
           />
         </div>
       </div>

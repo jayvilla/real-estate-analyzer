@@ -47,16 +47,16 @@ export default function PropertyDetailModal({
   };
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-lg shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+    <div className="fixed inset-0 bg-black/50 dark:bg-black/70 flex items-center justify-center z-50 p-4">
+      <div className="bg-white dark:bg-neutral-800 rounded-lg shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto border border-neutral-200 dark:border-neutral-700">
         <div className="p-6">
           <div className="flex justify-between items-center mb-4">
-            <h2 className="text-2xl font-bold text-gray-900">
+            <h2 className="text-2xl font-bold text-neutral-900 dark:text-neutral-50">
               Property Details
             </h2>
             <button
               onClick={onClose}
-              className="text-gray-400 hover:text-gray-600"
+              className="text-neutral-400 dark:text-neutral-500 hover:text-neutral-600 dark:hover:text-neutral-300 transition-colors"
             >
               <svg
                 className="w-6 h-6"
@@ -85,59 +85,59 @@ export default function PropertyDetailModal({
             <div className="space-y-4">
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="text-sm font-medium text-gray-500">
+                  <label className="text-sm font-medium text-neutral-500 dark:text-neutral-400">
                     Address
                   </label>
-                  <p className="text-gray-900">{property.address}</p>
+                  <p className="text-neutral-900 dark:text-neutral-50">{property.address}</p>
                 </div>
                 <div>
-                  <label className="text-sm font-medium text-gray-500">
+                  <label className="text-sm font-medium text-neutral-500 dark:text-neutral-400">
                     City, State ZIP
                   </label>
-                  <p className="text-gray-900">
+                  <p className="text-neutral-900 dark:text-neutral-50">
                     {property.city}, {property.state} {property.zipCode}
                   </p>
                 </div>
                 <div>
-                  <label className="text-sm font-medium text-gray-500">
+                  <label className="text-sm font-medium text-neutral-500 dark:text-neutral-400">
                     Property Type
                   </label>
-                  <p className="text-gray-900">
+                  <p className="text-neutral-900 dark:text-neutral-50">
                     {property.propertyType.replace('_', ' ')}
                   </p>
                 </div>
                 {property.bedrooms && (
                   <div>
-                    <label className="text-sm font-medium text-gray-500">
+                    <label className="text-sm font-medium text-neutral-500 dark:text-neutral-400">
                       Bedrooms
                     </label>
-                    <p className="text-gray-900">{property.bedrooms}</p>
+                    <p className="text-neutral-900 dark:text-neutral-50">{property.bedrooms}</p>
                   </div>
                 )}
                 {property.bathrooms && (
                   <div>
-                    <label className="text-sm font-medium text-gray-500">
+                    <label className="text-sm font-medium text-neutral-500 dark:text-neutral-400">
                       Bathrooms
                     </label>
-                    <p className="text-gray-900">{property.bathrooms}</p>
+                    <p className="text-neutral-900 dark:text-neutral-50">{property.bathrooms}</p>
                   </div>
                 )}
                 {property.squareFeet && (
                   <div>
-                    <label className="text-sm font-medium text-gray-500">
+                    <label className="text-sm font-medium text-neutral-500 dark:text-neutral-400">
                       Square Feet
                     </label>
-                    <p className="text-gray-900">
+                    <p className="text-neutral-900 dark:text-neutral-50">
                       {new Intl.NumberFormat('en-US').format(property.squareFeet)}
                     </p>
                   </div>
                 )}
                 {property.purchasePrice && (
                   <div>
-                    <label className="text-sm font-medium text-gray-500">
+                    <label className="text-sm font-medium text-neutral-500 dark:text-neutral-400">
                       Purchase Price
                     </label>
-                    <p className="text-gray-900">
+                    <p className="text-neutral-900 dark:text-neutral-50">
                       {new Intl.NumberFormat('en-US', {
                         style: 'currency',
                         currency: 'USD',
@@ -147,10 +147,10 @@ export default function PropertyDetailModal({
                 )}
                 {property.currentValue && (
                   <div>
-                    <label className="text-sm font-medium text-gray-500">
+                    <label className="text-sm font-medium text-neutral-500 dark:text-neutral-400">
                       Current Value
                     </label>
-                    <p className="text-gray-900">
+                    <p className="text-neutral-900 dark:text-neutral-50">
                       {new Intl.NumberFormat('en-US', {
                         style: 'currency',
                         currency: 'USD',
@@ -160,7 +160,7 @@ export default function PropertyDetailModal({
                 )}
               </div>
 
-              <div className="flex justify-end space-x-3 pt-4 border-t">
+              <div className="flex justify-end space-x-3 pt-4 border-t border-neutral-200 dark:border-neutral-700">
                 <Button
                   variant="danger"
                   onClick={handleDelete}

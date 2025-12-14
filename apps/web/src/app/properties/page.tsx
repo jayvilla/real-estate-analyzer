@@ -167,8 +167,8 @@ function PropertiesPageContent() {
               onRetry={handleRetryForm}
               isLoading={createMutation.isPending}
             >
-              <div className="mb-8 glass rounded-3xl p-8 border border-neutral-200/50 shadow-medium animate-scale-in card-hover">
-                <div className="flex items-center mb-6 pb-6 border-b border-neutral-200/50">
+              <div className="mb-8 glass rounded-3xl p-8 border border-neutral-200/50 dark:border-neutral-700/50 shadow-medium animate-scale-in card-hover">
+                <div className="flex items-center mb-6 pb-6 border-b border-neutral-200/50 dark:border-neutral-700/50">
                   <div className="w-12 h-12 bg-gradient-to-br from-brand-primary-500 to-brand-secondary-500 rounded-xl flex items-center justify-center mr-4 shadow-soft">
                     <svg
                       className="w-6 h-6 text-white"
@@ -185,10 +185,10 @@ function PropertiesPageContent() {
                     </svg>
                   </div>
                   <div>
-                    <h2 className="text-2xl font-display font-bold text-neutral-900">
+                    <h2 className="text-2xl font-display font-bold text-neutral-900 dark:text-neutral-50">
                       Create New Property
                     </h2>
-                    <p className="text-sm text-neutral-500 mt-1">
+                    <p className="text-sm text-neutral-500 dark:text-neutral-400 mt-1">
                       Add a new property to your portfolio
                     </p>
                   </div>

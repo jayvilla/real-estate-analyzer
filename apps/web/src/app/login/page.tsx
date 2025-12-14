@@ -29,25 +29,25 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-neutral-50 via-white to-neutral-50 py-12 px-4 sm:px-6 lg:px-8">
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-neutral-50 via-white to-neutral-50 dark:from-neutral-950 dark:via-neutral-900 dark:to-neutral-950 py-12 px-4 sm:px-6 lg:px-8 transition-colors duration-300">
       <div className="max-w-md w-full space-y-8">
         <div className="text-center">
-          <h2 className="text-4xl font-display font-bold text-neutral-900 mb-2">
+          <h2 className="text-4xl font-display font-bold text-neutral-900 dark:text-neutral-50 mb-2">
             Welcome Back
           </h2>
-          <p className="text-neutral-600">Sign in to your account</p>
+          <p className="text-neutral-600 dark:text-neutral-400">Sign in to your account</p>
         </div>
 
-        <div className="glass rounded-3xl p-8 border border-neutral-200/50 shadow-medium">
+        <div className="glass rounded-3xl p-8 border border-neutral-200/50 dark:border-neutral-700/50 shadow-medium">
           <form className="space-y-6" onSubmit={handleSubmit}>
             {error && (
-              <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg">
+              <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 text-red-700 dark:text-red-400 px-4 py-3 rounded-lg">
                 {error}
               </div>
             )}
 
             <div>
-              <label htmlFor="email" className="block text-sm font-medium text-neutral-700 mb-2">
+              <label htmlFor="email" className="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-2">
                 Email address
               </label>
               <input
@@ -58,13 +58,13 @@ export default function LoginPage() {
                 required
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className="w-full px-4 py-3 border border-neutral-300 rounded-lg focus:ring-2 focus:ring-brand-primary-500 focus:border-transparent"
+                className="w-full px-4 py-3 border border-neutral-300 dark:border-neutral-600 rounded-lg focus:ring-2 focus:ring-brand-primary-500/50 focus:border-transparent bg-white dark:bg-neutral-800 text-neutral-900 dark:text-neutral-50 placeholder-neutral-400 dark:placeholder-neutral-500"
                 placeholder="you@example.com"
               />
             </div>
 
             <div>
-              <label htmlFor="password" className="block text-sm font-medium text-neutral-700 mb-2">
+              <label htmlFor="password" className="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-2">
                 Password
               </label>
               <input
@@ -75,7 +75,7 @@ export default function LoginPage() {
                 required
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                className="w-full px-4 py-3 border border-neutral-300 rounded-lg focus:ring-2 focus:ring-brand-primary-500 focus:border-transparent"
+                className="w-full px-4 py-3 border border-neutral-300 dark:border-neutral-600 rounded-lg focus:ring-2 focus:ring-brand-primary-500/50 focus:border-transparent bg-white dark:bg-neutral-800 text-neutral-900 dark:text-neutral-50 placeholder-neutral-400 dark:placeholder-neutral-500"
                 placeholder="••••••••"
               />
             </div>
@@ -84,16 +84,16 @@ export default function LoginPage() {
               <button
                 type="submit"
                 disabled={isLoading}
-                className="w-full flex justify-center py-3 px-4 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-brand-primary-600 hover:bg-brand-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-brand-primary-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                className="w-full flex justify-center py-3 px-4 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-brand-primary-600 hover:bg-brand-primary-700 dark:bg-brand-primary-500 dark:hover:bg-brand-primary-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-brand-primary-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
               >
                 {isLoading ? 'Signing in...' : 'Sign in'}
               </button>
             </div>
 
             <div className="text-center">
-              <p className="text-sm text-neutral-600">
+              <p className="text-sm text-neutral-600 dark:text-neutral-400">
                 Don't have an account?{' '}
-                <Link href="/register" className="font-medium text-brand-primary-600 hover:text-brand-primary-500">
+                <Link href="/register" className="font-medium text-brand-primary-600 dark:text-brand-primary-400 hover:text-brand-primary-500 dark:hover:text-brand-primary-300">
                   Sign up
                 </Link>
               </p>
