@@ -2,11 +2,13 @@
 
 import React, { useMemo } from 'react';
 import { useQuery } from '@tanstack/react-query';
+import { ProtectedRoute } from '../../components/auth/ProtectedRoute';
+import { Navigation } from '../../components/shared/Navigation';
 import { analyticsApi } from '../../lib/api';
 import { MetricCard, LineChart, BarChart } from '../../components/analytics';
 import { AnalyticsDashboard } from '@real-estate-analyzer/types';
 
-export default function AnalyticsPage() {
+function AnalyticsPageContent() {
   const {
     data: dashboard,
     isLoading,
@@ -70,16 +72,16 @@ export default function AnalyticsPage() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-neutral-50 to-neutral-100">
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-neutral-50 to-neutral-100 dark:from-neutral-900 dark:to-neutral-800 transition-colors duration-300">
         <div className="text-center">
           <div className="inline-block relative">
-            <div className="w-16 h-16 border-4 border-brand-primary-200 border-t-brand-primary-600 rounded-full animate-spin"></div>
+            <div className="w-16 h-16 border-4 border-brand-primary-200 dark:border-brand-primary-800 border-t-brand-primary-600 dark:border-t-brand-primary-500 rounded-full animate-spin"></div>
             <div
-              className="absolute inset-0 w-16 h-16 border-4 border-transparent border-t-brand-secondary-600 rounded-full animate-spin"
+              className="absolute inset-0 w-16 h-16 border-4 border-transparent border-t-brand-secondary-600 dark:border-t-brand-secondary-500 rounded-full animate-spin"
               style={{ animationDirection: 'reverse', animationDuration: '1.5s' }}
             ></div>
           </div>
-          <p className="mt-6 text-lg font-medium text-neutral-700">
+          <p className="mt-6 text-lg font-medium text-neutral-700 dark:text-neutral-300">
             Loading analytics...
           </p>
         </div>
@@ -89,11 +91,11 @@ export default function AnalyticsPage() {
 
   if (error) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-neutral-50 to-neutral-100">
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-neutral-50 to-neutral-100 dark:from-neutral-900 dark:to-neutral-800 transition-colors duration-300">
         <div className="text-center glass rounded-3xl p-12 max-w-md mx-4">
-          <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
+          <div className="w-16 h-16 bg-red-100 dark:bg-red-900/30 rounded-full flex items-center justify-center mx-auto mb-4">
             <svg
-              className="w-8 h-8 text-red-600"
+              className="w-8 h-8 text-red-600 dark:text-red-400"
               fill="none"
               stroke="currentColor"
               viewBox="0 0 24 24"
@@ -106,10 +108,10 @@ export default function AnalyticsPage() {
               />
             </svg>
           </div>
-          <p className="text-lg font-semibold text-neutral-900 mb-2">
+          <p className="text-lg font-semibold text-neutral-900 dark:text-neutral-50 mb-2">
             Error loading analytics
           </p>
-          <p className="text-neutral-600">
+          <p className="text-neutral-600 dark:text-neutral-400">
             Please try again or contact support if the problem persists.
           </p>
         </div>
@@ -122,21 +124,24 @@ export default function AnalyticsPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-neutral-50 via-white to-neutral-50">
-      {/* Background decoration */}
-      <div className="absolute top-0 right-0 w-96 h-96 bg-brand-primary-200 rounded-full mix-blend-multiply filter blur-3xl opacity-10 animate-float" />
-      <div className="absolute bottom-0 left-0 w-96 h-96 bg-brand-secondary-200 rounded-full mix-blend-multiply filter blur-3xl opacity-10 animate-float delay-300" />
+    <ProtectedRoute>
+      <div className="min-h-screen bg-gradient-to-br from-neutral-50 via-white to-neutral-50 dark:from-neutral-950 dark:via-neutral-900 dark:to-neutral-950 transition-colors duration-300">
+        <Navigation />
+        
+        {/* Background decoration */}
+        <div className="absolute top-0 right-0 w-96 h-96 bg-brand-primary-200 dark:bg-brand-primary-900/20 rounded-full mix-blend-multiply filter blur-3xl opacity-10 animate-float" />
+        <div className="absolute bottom-0 left-0 w-96 h-96 bg-brand-secondary-200 dark:bg-brand-secondary-900/20 rounded-full mix-blend-multiply filter blur-3xl opacity-10 animate-float delay-300" />
 
-      <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        {/* Header */}
-        <div className="mb-8 animate-fade-in-down">
-          <h1 className="text-4xl md:text-5xl font-display font-bold text-neutral-900 mb-2">
-            Analytics Dashboard
-          </h1>
-          <p className="text-neutral-600">
-            Comprehensive insights into your real estate portfolio
-          </p>
-        </div>
+        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+          {/* Header */}
+          <div className="mb-8 animate-fade-in-down">
+            <h1 className="text-4xl md:text-5xl font-display font-bold text-neutral-900 dark:text-neutral-50 mb-2">
+              Analytics Dashboard
+            </h1>
+            <p className="text-neutral-600 dark:text-neutral-400">
+              Comprehensive insights into your real estate portfolio
+            </p>
+          </div>
 
         {/* Portfolio Summary Metrics */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8 animate-stagger-children">
@@ -265,59 +270,59 @@ export default function AnalyticsPage() {
 
         {/* Property Performance Table */}
         {dashboard.propertyPerformance && dashboard.propertyPerformance.length > 0 && (
-          <div className="glass rounded-3xl border border-neutral-200/50 shadow-medium overflow-hidden mb-8 animate-fade-in-up delay-300">
-            <div className="p-6 border-b border-neutral-200">
-              <h2 className="text-2xl font-display font-bold text-neutral-900">
+          <div className="glass rounded-3xl border border-neutral-200/50 dark:border-neutral-700/50 shadow-medium overflow-hidden mb-8 animate-fade-in-up delay-300">
+            <div className="p-6 border-b border-neutral-200 dark:border-neutral-700">
+              <h2 className="text-2xl font-display font-bold text-neutral-900 dark:text-neutral-50">
                 Property Performance
               </h2>
             </div>
             <div className="overflow-x-auto">
               <table className="w-full">
-                <thead className="bg-neutral-50">
+                <thead className="bg-neutral-50 dark:bg-neutral-800">
                   <tr>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-neutral-500 uppercase tracking-wider">
+                    <th className="px-6 py-3 text-left text-xs font-medium text-neutral-500 dark:text-neutral-400 uppercase tracking-wider">
                       Property
                     </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-neutral-500 uppercase tracking-wider">
+                    <th className="px-6 py-3 text-left text-xs font-medium text-neutral-500 dark:text-neutral-400 uppercase tracking-wider">
                       Deals
                     </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-neutral-500 uppercase tracking-wider">
+                    <th className="px-6 py-3 text-left text-xs font-medium text-neutral-500 dark:text-neutral-400 uppercase tracking-wider">
                       Cash Invested
                     </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-neutral-500 uppercase tracking-wider">
+                    <th className="px-6 py-3 text-left text-xs font-medium text-neutral-500 dark:text-neutral-400 uppercase tracking-wider">
                       Annual Cash Flow
                     </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-neutral-500 uppercase tracking-wider">
+                    <th className="px-6 py-3 text-left text-xs font-medium text-neutral-500 dark:text-neutral-400 uppercase tracking-wider">
                       Avg Cap Rate
                     </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-neutral-500 uppercase tracking-wider">
+                    <th className="px-6 py-3 text-left text-xs font-medium text-neutral-500 dark:text-neutral-400 uppercase tracking-wider">
                       Avg Cash-on-Cash
                     </th>
                   </tr>
                 </thead>
-                <tbody className="bg-white divide-y divide-neutral-200">
+                <tbody className="bg-white dark:bg-neutral-900 divide-y divide-neutral-200 dark:divide-neutral-700">
                   {dashboard.propertyPerformance.map((property) => (
-                    <tr key={property.propertyId} className="hover:bg-neutral-50 transition-colors">
+                    <tr key={property.propertyId} className="hover:bg-neutral-50 dark:hover:bg-neutral-800 transition-colors">
                       <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="text-sm font-medium text-neutral-900">
+                        <div className="text-sm font-medium text-neutral-900 dark:text-neutral-50">
                           {property.address}
                         </div>
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-neutral-600">
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-neutral-600 dark:text-neutral-300">
                         {property.totalDeals}
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-neutral-600">
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-neutral-600 dark:text-neutral-300">
                         ${(property.totalCashInvested ?? 0).toLocaleString()}
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-neutral-600">
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-neutral-600 dark:text-neutral-300">
                         ${(property.totalAnnualCashFlow ?? 0).toLocaleString()}
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-neutral-600">
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-neutral-600 dark:text-neutral-300">
                         {property.averageCapRate
                           ? `${property.averageCapRate.toFixed(2)}%`
                           : 'N/A'}
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-neutral-600">
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-neutral-600 dark:text-neutral-300">
                         {property.averageCashOnCashReturn
                           ? `${property.averageCashOnCashReturn.toFixed(2)}%`
                           : 'N/A'}
@@ -329,8 +334,13 @@ export default function AnalyticsPage() {
             </div>
           </div>
         )}
+        </div>
       </div>
-    </div>
+    </ProtectedRoute>
   );
+}
+
+export default function AnalyticsPage() {
+  return <AnalyticsPageContent />;
 }
 

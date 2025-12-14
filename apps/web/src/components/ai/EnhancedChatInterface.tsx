@@ -155,7 +155,7 @@ export function EnhancedChatInterface({
       {/* Messages */}
       <div className="flex-1 overflow-y-auto p-4 space-y-4">
         {messages.length === 0 && (
-          <div className="text-center text-gray-400 mt-8">
+          <div className="text-center text-neutral-500 dark:text-neutral-400 mt-8">
             <p className="text-lg mb-2">Ask me anything about your portfolio!</p>
             <p className="text-sm">Try: "Show me all properties in California" or "What's my average cap rate?"</p>
           </div>
@@ -169,20 +169,20 @@ export function EnhancedChatInterface({
             <div
               className={`max-w-[80%] rounded-lg p-3 ${
                 message.role === 'user'
-                  ? 'bg-blue-500/20 text-white'
+                  ? 'bg-brand-primary-100 dark:bg-brand-primary-900/30 text-brand-primary-900 dark:text-brand-primary-50'
                   : message.error
-                  ? 'bg-red-500/20 text-red-200'
-                  : 'bg-white/10 text-gray-200'
+                  ? 'bg-red-100 dark:bg-red-900/30 text-red-900 dark:text-red-200'
+                  : 'bg-neutral-100 dark:bg-neutral-800 text-neutral-900 dark:text-neutral-50'
               }`}
             >
               <div className="whitespace-pre-wrap">{message.content}</div>
               {message.queryResult && (
-                <div className="mt-2 pt-2 border-t border-white/20 text-xs text-gray-400">
+                <div className="mt-2 pt-2 border-t border-neutral-200 dark:border-neutral-700 text-xs text-neutral-500 dark:text-neutral-400">
                   {message.queryResult.resultCount} results in {message.queryResult.executionTime}ms
                 </div>
               )}
               {message.error && (
-                <div className="mt-2 text-xs text-red-300">{message.error}</div>
+                <div className="mt-2 text-xs text-red-600 dark:text-red-400">{message.error}</div>
               )}
             </div>
           </div>
@@ -190,7 +190,7 @@ export function EnhancedChatInterface({
 
         {isLoading && (
           <div className="flex justify-start">
-            <div className="bg-white/10 rounded-lg p-3 text-gray-200">
+            <div className="bg-neutral-100 dark:bg-neutral-800 rounded-lg p-3 text-neutral-900 dark:text-neutral-50">
               <LoadingState message="Processing your query..." size="sm" />
             </div>
           </div>
@@ -198,7 +198,7 @@ export function EnhancedChatInterface({
 
         {error && !isLoading && (
           <div className="flex justify-start">
-            <div className="bg-red-500/20 rounded-lg p-4 max-w-[80%]">
+            <div className="bg-red-100 dark:bg-red-900/30 rounded-lg p-4 max-w-[80%]">
               <ErrorState error={error} onRetry={handleRetry} />
             </div>
           </div>
@@ -209,14 +209,14 @@ export function EnhancedChatInterface({
 
       {/* Suggestions */}
       {suggestions && suggestions.length > 0 && input.length === 0 && (
-        <div className="px-4 py-2 border-t border-white/20">
-          <div className="text-xs text-gray-400 mb-2">Suggestions:</div>
+        <div className="px-4 py-2 border-t border-neutral-200 dark:border-neutral-700">
+          <div className="text-xs text-neutral-500 dark:text-neutral-400 mb-2">Suggestions:</div>
           <div className="flex flex-wrap gap-2">
             {suggestions.map((suggestion, idx) => (
               <button
                 key={idx}
                 onClick={() => handleSuggestionClick(suggestion.query)}
-                className="px-3 py-1 bg-white/5 hover:bg-white/10 rounded text-sm text-gray-300 transition-colors"
+                className="px-3 py-1 bg-neutral-100 dark:bg-neutral-800 hover:bg-neutral-200 dark:hover:bg-neutral-700 rounded text-sm text-neutral-700 dark:text-neutral-300 transition-colors"
               >
                 {suggestion.query}
               </button>
@@ -226,7 +226,7 @@ export function EnhancedChatInterface({
       )}
 
       {/* Input */}
-      <form onSubmit={handleSubmit} className="p-4 border-t border-white/20">
+      <form onSubmit={handleSubmit} className="p-4 border-t border-neutral-200 dark:border-neutral-700">
         <div className="flex gap-2">
           <input
             ref={inputRef}
@@ -234,19 +234,19 @@ export function EnhancedChatInterface({
             value={input}
             onChange={(e) => setInput(e.target.value)}
             placeholder="Ask a question about your portfolio..."
-            className="flex-1 bg-white/10 border border-white/20 rounded-lg px-4 py-2 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500/50"
+            className="flex-1 bg-white dark:bg-neutral-800 border border-neutral-300 dark:border-neutral-600 rounded-lg px-4 py-2 text-neutral-900 dark:text-neutral-50 placeholder-neutral-500 dark:placeholder-neutral-400 focus:outline-none focus:ring-2 focus:ring-brand-primary-500 dark:focus:ring-brand-primary-400 focus:border-transparent transition-colors duration-200"
             disabled={isLoading}
           />
           <button
             type="submit"
             disabled={!input.trim() || isLoading}
-            className="px-6 py-2 bg-blue-500 hover:bg-blue-600 disabled:bg-gray-600 disabled:cursor-not-allowed rounded-lg text-white font-medium transition-colors"
+            className="px-6 py-2 bg-brand-primary-600 dark:bg-brand-primary-500 hover:bg-brand-primary-700 dark:hover:bg-brand-primary-600 disabled:bg-neutral-400 dark:disabled:bg-neutral-600 disabled:cursor-not-allowed rounded-lg text-white font-medium transition-colors"
           >
             {isLoading ? 'Sending...' : 'Send'}
           </button>
         </div>
         {retryCount > 0 && (
-          <div className="mt-2 text-xs text-yellow-400">
+          <div className="mt-2 text-xs text-yellow-600 dark:text-yellow-400">
             Retrying... ({retryCount}/3)
           </div>
         )}

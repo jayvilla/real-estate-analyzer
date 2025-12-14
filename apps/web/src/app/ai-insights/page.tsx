@@ -2,6 +2,7 @@
 
 import React, { useState } from 'react';
 import { ProtectedRoute } from '../../components/auth/ProtectedRoute';
+import { Navigation } from '../../components/shared/Navigation';
 import { AIInsightsPanel } from '../../components/ai/AIInsightsPanel';
 import { EnhancedChatInterface } from '../../components/ai/EnhancedChatInterface';
 import { AIPreferences } from '../../components/ai/AIPreferences';
@@ -20,24 +21,28 @@ export default function AIInsightsPage() {
 
   return (
     <ProtectedRoute>
-      <div className="min-h-screen bg-gradient-to-br from-gray-900 via-blue-900 to-gray-900 p-4">
-        <div className="max-w-7xl mx-auto">
+      <div className="min-h-screen bg-gradient-to-br from-neutral-50 via-white to-neutral-50 dark:from-neutral-900 dark:via-neutral-800 dark:to-neutral-900 transition-colors duration-300">
+        <Navigation />
+        
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
           {/* Header */}
-          <div className="mb-6">
-            <h1 className="text-3xl font-bold text-white mb-2">AI Insights</h1>
-            <p className="text-gray-400">
+          <div className="mb-8 animate-fade-in-down">
+            <h1 className="text-4xl md:text-5xl font-display font-bold text-neutral-900 dark:text-neutral-50 mb-2">
+              AI Insights
+            </h1>
+            <p className="text-lg text-neutral-600 dark:text-neutral-400">
               Get AI-powered insights about your portfolio, properties, and deals
             </p>
           </div>
 
           {/* Tabs */}
-          <div className="flex gap-2 mb-6 border-b border-white/20">
+          <div className="flex gap-2 mb-6 border-b border-neutral-200 dark:border-neutral-700">
             <button
               onClick={() => setActiveView('insights')}
               className={`px-4 py-2 text-sm font-medium transition-colors ${
                 activeView === 'insights'
-                  ? 'text-white border-b-2 border-blue-500'
-                  : 'text-gray-400 hover:text-white'
+                  ? 'text-brand-primary-600 dark:text-brand-primary-400 border-b-2 border-brand-primary-600 dark:border-brand-primary-400'
+                  : 'text-neutral-600 dark:text-neutral-400 hover:text-neutral-900 dark:hover:text-neutral-50'
               }`}
             >
               Insights
@@ -46,8 +51,8 @@ export default function AIInsightsPage() {
               onClick={() => setActiveView('chat')}
               className={`px-4 py-2 text-sm font-medium transition-colors ${
                 activeView === 'chat'
-                  ? 'text-white border-b-2 border-blue-500'
-                  : 'text-gray-400 hover:text-white'
+                  ? 'text-brand-primary-600 dark:text-brand-primary-400 border-b-2 border-brand-primary-600 dark:border-brand-primary-400'
+                  : 'text-neutral-600 dark:text-neutral-400 hover:text-neutral-900 dark:hover:text-neutral-50'
               }`}
             >
               Chat
@@ -56,8 +61,8 @@ export default function AIInsightsPage() {
               onClick={() => setActiveView('preferences')}
               className={`px-4 py-2 text-sm font-medium transition-colors ${
                 activeView === 'preferences'
-                  ? 'text-white border-b-2 border-blue-500'
-                  : 'text-gray-400 hover:text-white'
+                  ? 'text-brand-primary-600 dark:text-brand-primary-400 border-b-2 border-brand-primary-600 dark:border-brand-primary-400'
+                  : 'text-neutral-600 dark:text-neutral-400 hover:text-neutral-900 dark:hover:text-neutral-50'
               }`}
             >
               Preferences
@@ -67,13 +72,13 @@ export default function AIInsightsPage() {
           {/* Property Selector */}
           {activeView === 'insights' && properties && properties.length > 0 && (
             <div className="mb-6">
-              <label className="block text-sm font-medium text-white mb-2">
+              <label className="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-2">
                 Select Property
               </label>
               <select
                 value={selectedPropertyId || ''}
                 onChange={(e) => setSelectedPropertyId(e.target.value || undefined)}
-                className="bg-white/10 border border-white/20 rounded-lg px-4 py-2 text-white focus:outline-none focus:ring-2 focus:ring-blue-500/50"
+                className="w-full px-4 py-3 border border-neutral-300 dark:border-neutral-600 rounded-lg bg-white dark:bg-neutral-800 text-neutral-900 dark:text-neutral-50 focus:ring-2 focus:ring-brand-primary-500 dark:focus:ring-brand-primary-400 focus:border-transparent transition-colors duration-200"
               >
                 <option value="">Select a property...</option>
                 {properties.map((p) => (
@@ -94,13 +99,15 @@ export default function AIInsightsPage() {
           )}
 
           {activeView === 'chat' && (
-            <div className="bg-white/5 backdrop-blur-md rounded-lg border border-white/20 h-[calc(100vh-300px)]">
+            <div className="glass rounded-2xl border border-neutral-200/50 shadow-medium h-[calc(100vh-400px)] min-h-[600px]">
               <EnhancedChatInterface className="h-full" />
             </div>
           )}
 
           {activeView === 'preferences' && (
-            <AIPreferences className="max-w-2xl" />
+            <div className="glass rounded-2xl border border-neutral-200/50 shadow-medium p-6">
+              <AIPreferences className="max-w-2xl" />
+            </div>
           )}
         </div>
       </div>

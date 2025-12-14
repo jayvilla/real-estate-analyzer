@@ -45,25 +45,25 @@ export function PropertyTable({
       case 'address':
         return (
           <div>
-            <div className="font-medium text-neutral-900">{property.address}</div>
-            <div className="text-neutral-500 text-xs mt-1">
+            <div className="font-medium text-neutral-900 dark:text-neutral-50">{property.address}</div>
+            <div className="text-neutral-500 dark:text-neutral-400 text-xs mt-1">
               {property.city}, {property.state} {property.zipCode}
             </div>
           </div>
         );
       case 'propertyType':
         return (
-          <span className="px-3 py-1 text-xs font-semibold rounded-full bg-brand-primary-100 text-brand-primary-700">
+          <span className="px-3 py-1 text-xs font-semibold rounded-full bg-brand-primary-100 dark:bg-brand-primary-900/30 text-brand-primary-700 dark:text-brand-primary-300">
             {property.propertyType.replace(/_/g, ' ')}
           </span>
         );
       case 'bedrooms':
-        return <span className="text-neutral-700">{property.bedrooms ?? '—'}</span>;
+        return <span className="text-neutral-700 dark:text-neutral-300">{property.bedrooms ?? '—'}</span>;
       case 'bathrooms':
-        return <span className="text-neutral-700">{property.bathrooms ?? '—'}</span>;
+        return <span className="text-neutral-700 dark:text-neutral-300">{property.bathrooms ?? '—'}</span>;
       case 'squareFeet':
         return (
-          <span className="text-neutral-700">
+          <span className="text-neutral-700 dark:text-neutral-300">
             {property.squareFeet
               ? new Intl.NumberFormat('en-US').format(property.squareFeet)
               : '—'}
@@ -71,7 +71,7 @@ export function PropertyTable({
         );
       case 'purchasePrice':
         return (
-          <span className="text-neutral-700 font-medium">
+          <span className="text-neutral-700 dark:text-neutral-300 font-medium">
             {property.purchasePrice
               ? new Intl.NumberFormat('en-US', {
                   style: 'currency',
@@ -83,7 +83,7 @@ export function PropertyTable({
         );
       case 'currentValue':
         return (
-          <span className="text-neutral-900 font-semibold">
+          <span className="text-neutral-900 dark:text-neutral-50 font-semibold">
             {property.currentValue
               ? new Intl.NumberFormat('en-US', {
                   style: 'currency',
@@ -101,9 +101,9 @@ export function PropertyTable({
   if (properties.length === 0) {
     return (
       <div className="text-center py-16">
-        <div className="w-16 h-16 bg-neutral-100 rounded-full flex items-center justify-center mx-auto mb-4">
+        <div className="w-16 h-16 bg-neutral-100 dark:bg-neutral-800 rounded-full flex items-center justify-center mx-auto mb-4">
           <svg
-            className="w-8 h-8 text-neutral-400"
+            className="w-8 h-8 text-neutral-400 dark:text-neutral-500"
             fill="none"
             stroke="currentColor"
             viewBox="0 0 24 24"
@@ -116,7 +116,7 @@ export function PropertyTable({
             />
           </svg>
         </div>
-        <p className="text-neutral-600 font-medium">
+        <p className="text-neutral-600 dark:text-neutral-400 font-medium">
           No properties found. Create your first property to get started!
         </p>
       </div>
@@ -136,12 +136,12 @@ export function PropertyTable({
   return (
     <div className="w-full">
       {/* Table Header - Fixed */}
-      <div className="sticky top-0 z-10 bg-neutral-50 border-b border-neutral-200">
+      <div className="sticky top-0 z-10 bg-neutral-50 dark:bg-neutral-800 border-b border-neutral-200 dark:border-neutral-700 transition-colors duration-300">
         <div className="flex">
           {columns.map((column) => (
             <div
               key={column.key}
-              className="px-6 py-4 text-left text-xs font-semibold text-neutral-600 uppercase tracking-wider"
+              className="px-6 py-4 text-left text-xs font-semibold text-neutral-600 dark:text-neutral-300 uppercase tracking-wider"
               style={{ width: column.width }}
             >
               {column.header}
@@ -172,8 +172,8 @@ export function PropertyTable({
                 data-index={virtualRow.index}
                 ref={rowVirtualizer.measureElement}
                 onClick={() => onPropertyClick?.(property)}
-                className={`flex border-b border-neutral-200 hover:bg-brand-primary-50 transition-all duration-200 ${
-                  onPropertyClick ? 'cursor-pointer active:bg-brand-primary-100' : ''
+                className={`flex border-b border-neutral-200 dark:border-neutral-700 hover:bg-brand-primary-50 dark:hover:bg-neutral-800 transition-all duration-200 ${
+                  onPropertyClick ? 'cursor-pointer active:bg-brand-primary-100 dark:active:bg-neutral-700' : ''
                 }`}
                 style={{
                   position: 'absolute',
@@ -201,8 +201,8 @@ export function PropertyTable({
       </div>
 
       {/* Footer with row count */}
-      <div className="sticky bottom-0 bg-neutral-50 border-t border-neutral-200 px-6 py-3">
-        <div className="text-xs text-neutral-500">
+      <div className="sticky bottom-0 bg-neutral-50 dark:bg-neutral-800 border-t border-neutral-200 dark:border-neutral-700 px-6 py-3 transition-colors duration-300">
+        <div className="text-xs text-neutral-500 dark:text-neutral-400">
           Showing {virtualRows.length} of {properties.length} properties
         </div>
       </div>

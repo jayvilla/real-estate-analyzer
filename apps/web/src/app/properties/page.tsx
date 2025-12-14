@@ -11,6 +11,7 @@ import {
 import { Button } from '@real-estate-analyzer/ui';
 import { PropertyProvider } from '../../stores/context/PropertyContext';
 import { ProtectedRoute } from '../../components/auth/ProtectedRoute';
+import { Navigation } from '../../components/shared/Navigation';
 import { useAuth } from '../../stores/auth/auth-context';
 
 // Dynamic imports for better code splitting
@@ -27,7 +28,7 @@ import {
 
 function PropertiesPageContent() {
   const queryClient = useQueryClient();
-  const { user, logout } = useAuth();
+  const { user } = useAuth();
   const [selectedProperty, setSelectedProperty] =
     React.useState<Property | null>(null);
   const [showForm, setShowForm] = React.useState(false);
@@ -114,88 +115,25 @@ function PropertiesPageContent() {
 
   return (
     <PropertyProvider>
-      <div className="min-h-screen bg-gradient-to-br from-neutral-50 via-white to-neutral-50">
+      <div className="min-h-screen bg-gradient-to-br from-neutral-50 via-white to-neutral-50 dark:from-neutral-900 dark:via-neutral-800 dark:to-neutral-900 transition-colors duration-300">
+        <Navigation />
+        
         {/* Background decoration */}
-        <div className="absolute top-0 right-0 w-96 h-96 bg-brand-primary-200 rounded-full mix-blend-multiply filter blur-3xl opacity-10 animate-float" />
-        <div className="absolute bottom-0 left-0 w-96 h-96 bg-brand-secondary-200 rounded-full mix-blend-multiply filter blur-3xl opacity-10 animate-float delay-300" />
+        <div className="absolute top-0 right-0 w-96 h-96 bg-brand-primary-200 dark:bg-brand-primary-900/20 rounded-full mix-blend-multiply filter blur-3xl opacity-10 animate-float" />
+        <div className="absolute bottom-0 left-0 w-96 h-96 bg-brand-secondary-200 dark:bg-brand-secondary-900/20 rounded-full mix-blend-multiply filter blur-3xl opacity-10 animate-float delay-300" />
 
         <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           {/* Header Section */}
           <div className="mb-8 animate-fade-in-down">
-            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-6 mb-6">
-              <div className="flex-1">
-                <h1 className="text-4xl md:text-5xl font-display font-bold text-neutral-900 mb-3">
-                  Properties
-                </h1>
-                <div className="flex flex-wrap items-center gap-3">
-                  <p className="text-neutral-600 text-base">
-                    Manage your real estate portfolio
-                  </p>
-                  {user && (
-                    <>
-                      <span className="text-neutral-400">•</span>
-                      <div className="flex items-center gap-2 px-3 py-1.5 bg-brand-primary-50 rounded-lg border border-brand-primary-200/50">
-                        <svg
-                          className="w-4 h-4 text-brand-primary-600"
-                          fill="none"
-                          stroke="currentColor"
-                          viewBox="0 0 24 24"
-                        >
-                          <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            strokeWidth={2}
-                            d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"
-                          />
-                        </svg>
-                        <span className="text-sm font-medium text-brand-primary-700">
-                          {user.organization?.name || 'Organization'}
-                        </span>
-                      </div>
-                    </>
-                  )}
-                </div>
-              </div>
-
-              {/* User Actions */}
-              <div className="flex items-center gap-3">
-                {user && (
-                  <div className="hidden sm:flex items-center gap-3 px-4 py-2.5 glass rounded-xl border border-neutral-200/50 shadow-soft">
-                    <div className="w-8 h-8 bg-gradient-to-br from-brand-primary-500 to-brand-secondary-500 rounded-lg flex items-center justify-center">
-                      <span className="text-sm font-semibold text-white">
-                        {user.firstName[0]}
-                        {user.lastName[0]}
-                      </span>
-                    </div>
-                    <div className="flex flex-col">
-                      <span className="text-sm font-medium text-neutral-900">
-                        {user.firstName} {user.lastName}
-                      </span>
-                      <span className="text-xs text-neutral-500 capitalize">
-                        {user.role.toLowerCase().replace('_', ' ')}
-                      </span>
-                    </div>
-                    <button
-                      onClick={logout}
-                      className="ml-2 p-2 text-neutral-500 hover:text-neutral-700 hover:bg-neutral-100 rounded-lg transition-all duration-200"
-                      title="Logout"
-                    >
-                      <svg
-                        className="w-5 h-5"
-                        fill="none"
-                        stroke="currentColor"
-                        viewBox="0 0 24 24"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth={2}
-                          d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"
-                        />
-                      </svg>
-                    </button>
-                  </div>
-                )}
+            <h1 className="text-4xl md:text-5xl font-display font-bold text-neutral-900 dark:text-neutral-50 mb-2">
+              Properties
+            </h1>
+            <p className="text-lg text-neutral-600 dark:text-neutral-400">
+              Manage your real estate portfolio
+            </p>
+          </div>
+          
+          <div className="flex justify-end mb-6">
                 <Button
                   onClick={() => setShowForm(!showForm)}
                   className="btn-glow shadow-medium hover:shadow-glow-lg transition-all duration-300 whitespace-nowrap"
@@ -221,8 +159,6 @@ function PropertiesPageContent() {
                     <>Add Property</>
                   )}
                 </Button>
-              </div>
-            </div>
           </div>
 
           {/* Form Section - Dynamically loaded with boundary */}
@@ -272,29 +208,29 @@ function PropertiesPageContent() {
               {isLoading ? (
                 <div className="p-16 md:p-20 text-center">
                   <div className="inline-block relative mb-6">
-                    <div className="w-16 h-16 border-4 border-brand-primary-200 border-t-brand-primary-600 rounded-full animate-spin"></div>
+                    <div className="w-16 h-16 border-4 border-brand-primary-200 dark:border-brand-primary-800 border-t-brand-primary-600 dark:border-t-brand-primary-500 rounded-full animate-spin"></div>
                     <div
-                      className="absolute inset-0 w-16 h-16 border-4 border-transparent border-t-brand-secondary-600 rounded-full animate-spin"
+                      className="absolute inset-0 w-16 h-16 border-4 border-transparent border-t-brand-secondary-600 dark:border-t-brand-secondary-500 rounded-full animate-spin"
                       style={{
                         animationDirection: 'reverse',
                         animationDuration: '1.5s',
                       }}
                     ></div>
                   </div>
-                  <p className="text-lg font-semibold text-neutral-900 mb-2">
+                  <p className="text-lg font-semibold text-neutral-900 dark:text-neutral-50 mb-2">
                     Loading properties...
                   </p>
-                  <p className="text-sm text-neutral-500">
+                  <p className="text-sm text-neutral-500 dark:text-neutral-400">
                     Please wait while we fetch your data
                   </p>
                 </div>
               ) : sortedProperties.length === 0 ? (
                 <div className="p-16 md:p-20 text-center">
                   <div className="relative inline-block mb-8">
-                    <div className="absolute inset-0 bg-gradient-to-br from-brand-primary-200/50 to-brand-secondary-200/50 rounded-full blur-2xl animate-pulse"></div>
-                    <div className="relative w-24 h-24 bg-gradient-to-br from-brand-primary-100 to-brand-secondary-100 rounded-full flex items-center justify-center border-4 border-white shadow-medium">
+                    <div className="absolute inset-0 bg-gradient-to-br from-brand-primary-200/50 dark:from-brand-primary-900/30 to-brand-secondary-200/50 dark:to-brand-secondary-900/30 rounded-full blur-2xl animate-pulse"></div>
+                    <div className="relative w-24 h-24 bg-gradient-to-br from-brand-primary-100 dark:from-brand-primary-900/50 to-brand-secondary-100 dark:to-brand-secondary-900/50 rounded-full flex items-center justify-center border-4 border-white dark:border-neutral-800 shadow-medium">
                       <svg
-                        className="w-12 h-12 text-brand-primary-600"
+                        className="w-12 h-12 text-brand-primary-600 dark:text-brand-primary-400"
                         fill="none"
                         stroke="currentColor"
                         viewBox="0 0 24 24"
@@ -308,10 +244,10 @@ function PropertiesPageContent() {
                       </svg>
                     </div>
                   </div>
-                  <h3 className="text-2xl font-display font-bold text-neutral-900 mb-3">
+                  <h3 className="text-2xl font-display font-bold text-neutral-900 dark:text-neutral-50 mb-3">
                     No properties yet
                   </h3>
-                  <p className="text-neutral-600 mb-8 max-w-md mx-auto text-lg">
+                  <p className="text-neutral-600 dark:text-neutral-400 mb-8 max-w-md mx-auto text-lg">
                     Get started by adding your first property to the portfolio
                     and begin tracking your real estate investments.
                   </p>

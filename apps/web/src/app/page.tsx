@@ -1,7 +1,38 @@
+'use client';
+
+import React, { useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { Button } from '@real-estate-analyzer/ui';
+import { useAuth } from '../stores/auth/auth-context';
 
 export default function Index() {
+  const { isAuthenticated, isLoading } = useAuth();
+  const router = useRouter();
+
+  useEffect(() => {
+    if (!isLoading && isAuthenticated) {
+      router.push('/dashboard');
+    }
+  }, [isAuthenticated, isLoading, router]);
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-neutral-50 to-neutral-100">
+        <div className="text-center">
+          <div className="inline-block relative">
+            <div className="w-16 h-16 border-4 border-brand-primary-200 border-t-brand-primary-600 rounded-full animate-spin"></div>
+          </div>
+          <p className="mt-6 text-lg font-medium text-neutral-700">Loading...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (isAuthenticated) {
+    return null; // Will redirect to dashboard
+  }
+
   return (
     <div className="min-h-screen relative overflow-hidden">
       {/* Animated gradient background */}
@@ -33,7 +64,7 @@ export default function Index() {
           </p>
           
           <div className="flex flex-col sm:flex-row justify-center items-center gap-4 mb-16 animate-fade-in-up delay-300">
-            <Link href="/properties">
+            <Link href="/register">
               <Button 
                 size="lg" 
                 className="btn-glow px-8 py-4 text-lg font-semibold shadow-medium hover:shadow-glow-lg transition-all duration-300"
@@ -49,20 +80,20 @@ export default function Index() {
                 </svg>
               </Button>
             </Link>
-            <Link href="/analytics">
+            <Link href="/login">
               <Button 
                 size="lg" 
                 variant="outline"
                 className="px-8 py-4 text-lg font-semibold shadow-medium hover:shadow-large transition-all duration-300"
               >
-                View Analytics
+                Sign In
                 <svg 
                   className="ml-2 w-5 h-5 inline-block" 
                   fill="none" 
                   stroke="currentColor" 
                   viewBox="0 0 24 24"
                 >
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1" />
                 </svg>
               </Button>
             </Link>

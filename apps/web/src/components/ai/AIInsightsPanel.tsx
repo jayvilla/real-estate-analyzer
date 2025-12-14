@@ -61,16 +61,16 @@ export function AIInsightsPanel({
     (activeTab === 'portfolio' && loadingPortfolio);
 
   return (
-    <div className={`bg-white/10 backdrop-blur-md rounded-lg border border-white/20 ${className}`}>
+    <div className={`glass rounded-lg border border-neutral-200/50 dark:border-neutral-700/50 ${className}`}>
       {/* Tabs */}
-      <div className="flex border-b border-white/20">
+      <div className="flex border-b border-neutral-200 dark:border-neutral-700">
         {propertyId && (
           <button
             onClick={() => setActiveTab('property')}
             className={`px-4 py-3 text-sm font-medium transition-colors ${
               activeTab === 'property'
-                ? 'text-white border-b-2 border-blue-500'
-                : 'text-gray-400 hover:text-white'
+                ? 'text-brand-primary-600 dark:text-brand-primary-400 border-b-2 border-brand-primary-600 dark:border-brand-primary-400'
+                : 'text-neutral-600 dark:text-neutral-400 hover:text-neutral-900 dark:hover:text-neutral-50'
             }`}
           >
             Property Analysis
@@ -81,8 +81,8 @@ export function AIInsightsPanel({
             onClick={() => setActiveTab('deal')}
             className={`px-4 py-3 text-sm font-medium transition-colors ${
               activeTab === 'deal'
-                ? 'text-white border-b-2 border-blue-500'
-                : 'text-gray-400 hover:text-white'
+                ? 'text-brand-primary-600 dark:text-brand-primary-400 border-b-2 border-brand-primary-600 dark:border-brand-primary-400'
+                : 'text-neutral-600 dark:text-neutral-400 hover:text-neutral-900 dark:hover:text-neutral-50'
             }`}
           >
             Deal Recommendation
@@ -93,8 +93,8 @@ export function AIInsightsPanel({
             onClick={() => setActiveTab('risk')}
             className={`px-4 py-3 text-sm font-medium transition-colors ${
               activeTab === 'risk'
-                ? 'text-white border-b-2 border-blue-500'
-                : 'text-gray-400 hover:text-white'
+                ? 'text-brand-primary-600 dark:text-brand-primary-400 border-b-2 border-brand-primary-600 dark:border-brand-primary-400'
+                : 'text-neutral-600 dark:text-neutral-400 hover:text-neutral-900 dark:hover:text-neutral-50'
             }`}
           >
             Risk Assessment
@@ -104,8 +104,8 @@ export function AIInsightsPanel({
           onClick={() => setActiveTab('portfolio')}
           className={`px-4 py-3 text-sm font-medium transition-colors ${
             activeTab === 'portfolio'
-              ? 'text-white border-b-2 border-blue-500'
-              : 'text-gray-400 hover:text-white'
+              ? 'text-brand-primary-600 dark:text-brand-primary-400 border-b-2 border-brand-primary-600 dark:border-brand-primary-400'
+              : 'text-neutral-600 dark:text-neutral-400 hover:text-neutral-900 dark:hover:text-neutral-50'
           }`}
         >
           Portfolio Insights
@@ -117,8 +117,8 @@ export function AIInsightsPanel({
         {isLoading && (
           <div className="flex items-center justify-center py-12">
             <div className="flex flex-col items-center gap-3">
-              <div className="w-8 h-8 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
-              <p className="text-gray-400 text-sm">Generating AI insights...</p>
+              <div className="w-8 h-8 border-4 border-brand-primary-500 dark:border-brand-primary-400 border-t-transparent rounded-full animate-spin"></div>
+              <p className="text-neutral-500 dark:text-neutral-400 text-sm">Generating AI insights...</p>
             </div>
           </div>
         )}
@@ -143,7 +143,7 @@ export function AIInsightsPanel({
           activeTab === 'property' &&
           !propertyAnalysis &&
           !propertyId && (
-            <div className="text-center py-12 text-gray-400">
+            <div className="text-center py-12 text-neutral-500 dark:text-neutral-400">
               Select a property to view AI analysis
             </div>
           )}
@@ -152,7 +152,7 @@ export function AIInsightsPanel({
           activeTab === 'deal' &&
           !dealRecommendation &&
           !dealId && (
-            <div className="text-center py-12 text-gray-400">
+            <div className="text-center py-12 text-neutral-500 dark:text-neutral-400">
               Select a deal to view AI recommendation
             </div>
           )}

@@ -12,6 +12,7 @@ import {
   ResponsiveContainer,
 } from 'recharts';
 import { TimeSeriesMetrics } from '@real-estate-analyzer/types';
+import { useTheme } from '../../stores/theme/theme-context';
 
 interface LineChartProps {
   data: TimeSeriesMetrics;
@@ -20,13 +21,16 @@ interface LineChartProps {
 }
 
 export function LineChart({ data, title, color = '#3b82f6' }: LineChartProps) {
+  const { theme } = useTheme();
+  const isDark = theme === 'dark';
+  
   if (!data || !data.dataPoints || !Array.isArray(data.dataPoints)) {
     return (
-      <div className="glass rounded-3xl p-6 border border-neutral-200/50 shadow-medium">
+      <div className="glass rounded-3xl p-6 border border-neutral-200/50 dark:border-neutral-700/50 shadow-medium">
         {title && (
-          <h3 className="text-xl font-semibold text-neutral-900 mb-4">{title}</h3>
+          <h3 className="text-xl font-semibold text-neutral-900 dark:text-neutral-50 mb-4">{title}</h3>
         )}
-        <div className="flex items-center justify-center h-[300px] text-neutral-500">
+        <div className="flex items-center justify-center h-[300px] text-neutral-500 dark:text-neutral-400">
           No data available
         </div>
       </div>
@@ -44,35 +48,40 @@ export function LineChart({ data, title, color = '#3b82f6' }: LineChartProps) {
   }));
 
   return (
-    <div className="glass rounded-3xl p-6 border border-neutral-200/50 shadow-medium">
+    <div className="glass rounded-3xl p-6 border border-neutral-200/50 dark:border-neutral-700/50 shadow-medium">
       {title && (
-        <h3 className="text-xl font-semibold text-neutral-900 mb-4">{title}</h3>
+        <h3 className="text-xl font-semibold text-neutral-900 dark:text-neutral-50 mb-4">{title}</h3>
       )}
       <ResponsiveContainer width="100%" height={300}>
         <RechartsLineChart data={chartData} margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
-          <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
+          <CartesianGrid strokeDasharray="3 3" stroke={isDark ? '#374151' : '#e5e7eb'} />
           <XAxis
             dataKey="date"
-            stroke="#6b7280"
+            stroke={isDark ? '#9ca3af' : '#6b7280'}
             style={{ fontSize: '12px' }}
+            tick={{ fill: isDark ? '#9ca3af' : '#6b7280' }}
           />
           <YAxis
-            stroke="#6b7280"
+            stroke={isDark ? '#9ca3af' : '#6b7280'}
             style={{ fontSize: '12px' }}
+            tick={{ fill: isDark ? '#9ca3af' : '#6b7280' }}
             tickFormatter={(value) => `$${value.toLocaleString()}`}
           />
           <Tooltip
             contentStyle={{
-              backgroundColor: 'white',
-              border: '1px solid #e5e7eb',
+              backgroundColor: isDark ? '#1f2937' : 'white',
+              border: isDark ? '1px solid #374151' : '1px solid #e5e7eb',
               borderRadius: '8px',
+              color: isDark ? '#f9fafb' : '#111827',
             }}
             formatter={(value: number) => [
               `$${value.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`,
               data.metric.replace(/_/g, ' ').replace(/\b\w/g, (l) => l.toUpperCase()),
             ]}
           />
-          <Legend />
+          <Legend 
+            wrapperStyle={{ color: isDark ? '#9ca3af' : '#6b7280' }}
+          />
           <Line
             type="monotone"
             dataKey="value"
