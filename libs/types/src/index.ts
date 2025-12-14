@@ -8,3 +8,4 @@ export * from './lib/auth.js';
 export * from './lib/scoring.js';
 export * from './lib/market.js';
 export * from './lib/llm.js';
+export * from './lib/nlq.js';

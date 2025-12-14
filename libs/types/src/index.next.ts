@@ -9,4 +9,5 @@ export * from './lib/auth';
 export * from './lib/scoring';
 export * from './lib/market';
 export * from './lib/llm';
+export * from './lib/nlq';
 

@@ -30,6 +30,9 @@ import {
   MarketCommentary,
   PropertyDescription,
   PortfolioInsight,
+  QueryResult,
+  QueryHistory,
+  QuerySuggestion,
 } from '@real-estate-analyzer/types';
 
 const apiClient = axios.create({
@@ -352,6 +355,25 @@ export const llmApi = {
 
   checkHealth: async (): Promise<{ available: boolean; provider: string; models: string[] }> => {
     const response = await apiClient.get('/llm/health');
+    return response.data;
+  },
+};
+
+export const nlqApi = {
+  processQuery: async (query: string): Promise<QueryResult> => {
+    const response = await apiClient.post<QueryResult>('/nlq/query', { query });
+    return response.data;
+  },
+
+  getHistory: async (limit?: number): Promise<QueryHistory[]> => {
+    const params = limit ? `?limit=${limit}` : '';
+    const response = await apiClient.get<QueryHistory[]>(`/nlq/history${params}`);
+    return response.data;
+  },
+
+  getSuggestions: async (limit?: number): Promise<QuerySuggestion[]> => {
+    const params = limit ? `?limit=${limit}` : '';
+    const response = await apiClient.get<QuerySuggestion[]>(`/nlq/suggestions${params}`);
     return response.data;
   },
 };
