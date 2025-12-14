@@ -18,6 +18,8 @@
     "db:migrate:market": "PGPASSWORD=postgres psql -h localhost -p 5433 -U postgres -d real_estate_analyzer -f apps/api/src/migrations/create-market-tables.sql",
     "db:migrate:nlq": "PGPASSWORD=postgres psql -h localhost -p 5433 -U postgres -d real_estate_analyzer -f apps/api/src/migrations/create-query-history-table.sql",
     "db:migrate:ai-infra": "PGPASSWORD=postgres psql -h localhost -p 5433 -U postgres -d real_estate_analyzer -f apps/api/src/migrations/create-ai-infrastructure-tables.sql",
+    "db:migrate:all": "pnpm db:migrate && pnpm db:migrate:update-enum && pnpm db:migrate:deals && pnpm db:migrate:auth && pnpm db:migrate:scoring && pnpm db:migrate:market && pnpm db:migrate:nlq && pnpm db:migrate:ai-infra",
+    "db:seed": "pnpm nx run @real-estate-analyzer/types:build && ts-node -r tsconfig-paths/register --project apps/api/tsconfig.seed.json apps/api/src/seed/seed.ts",
     "test:logging": "bash apps/api/test-logging.sh",
     "test:errors": "bash apps/api/test-error-standardization.sh",
     "test:valuation": "bash apps/api/test-valuation.sh",
