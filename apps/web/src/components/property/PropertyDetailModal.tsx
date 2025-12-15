@@ -1,6 +1,7 @@
 'use client';
 
 import React from 'react';
+import { useRouter } from 'next/navigation';
 import { Property, UpdatePropertyDto } from '@real-estate-analyzer/types';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { propertyApi } from '../../lib/api';
@@ -17,7 +18,13 @@ export default function PropertyDetailModal({
   onClose,
 }: PropertyDetailModalProps) {
   const queryClient = useQueryClient();
+  const router = useRouter();
   const [isEditing, setIsEditing] = React.useState(false);
+
+  const handleCreateDeal = () => {
+    onClose();
+    router.push(`/deals?propertyId=${property.id}`);
+  };
 
   const updateMutation = useMutation({
     mutationFn: ({ id, data }: { id: string; data: UpdatePropertyDto }) =>
@@ -167,6 +174,25 @@ export default function PropertyDetailModal({
                   isLoading={deleteMutation.isPending}
                 >
                   Delete
+                </Button>
+                <Button
+                  onClick={handleCreateDeal}
+                  className="bg-brand-primary-600 hover:bg-brand-primary-700 text-white"
+                >
+                  <svg
+                    className="w-4 h-4 mr-2"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M12 4v16m8-8H4"
+                    />
+                  </svg>
+                  Create Deal
                 </Button>
                 <Button variant="secondary" onClick={() => setIsEditing(true)}>
                   Edit

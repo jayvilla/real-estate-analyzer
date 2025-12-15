@@ -52,67 +52,125 @@ export class AnalyticsService {
         (d) => d.status === 'CLOSED' || d.status === 'UNDER_CONTRACT'
       );
 
-      // Calculate valuations for all deals
-      const valuations = deals.map((deal) =>
+      // Calculate valuations for all deals (including active ones for cash flow)
+      const allValuations = deals.map((deal) =>
         this.valuationService.calculateDealValuation(deal)
       );
 
+      // For cash flow calculations, use all deals (not just active)
+      // This ensures we capture all cash flow, not just from closed/under contract deals
+      const valuations = allValuations;
+
       // Aggregate metrics
+      // Helper to safely convert to number
+      const toNum = (val: any): number => {
+        if (val === null || val === undefined) return 0;
+        const num = typeof val === 'string' ? parseFloat(val) : Number(val);
+        return isNaN(num) ? 0 : num;
+      };
+
       const totalPortfolioValue = properties.reduce(
-        (sum, p) => sum + (p.currentValue || 0),
+        (sum, p) => {
+          // Use currentValue if available, otherwise fall back to purchasePrice
+          const currentVal = toNum(p.currentValue);
+          const purchaseVal = toNum(p.purchasePrice);
+          const value = currentVal > 0 ? currentVal : purchaseVal;
+          return sum + value;
+        },
         0
       );
 
       const totalCashInvested = valuations.reduce(
-        (sum, v) => sum + v.totalAcquisitionCost,
+        (sum, v) => {
+          const cashInvested = toNum(v.totalCashInvested);
+          return sum + cashInvested;
+        },
         0
       );
 
       const totalAnnualCashFlow = valuations.reduce(
-        (sum, v) => sum + v.cashFlow.annualCashFlow,
+        (sum, v) => {
+          const annualCashFlow = toNum(v.cashFlow?.annualCashFlow);
+          return sum + annualCashFlow;
+        },
         0
       );
 
-      const totalMonthlyCashFlow = totalAnnualCashFlow / 12;
+      // Calculate monthly cash flow by summing individual monthly cash flows
+      // This is more accurate than dividing annual by 12, as it handles deals with different payment schedules
+      const totalMonthlyCashFlow = valuations.reduce(
+        (sum, v) => {
+          const monthlyCashFlow = toNum(v.cashFlow?.monthlyCashFlow);
+          return sum + monthlyCashFlow;
+        },
+        0
+      );
 
       const totalAnnualNOI = valuations.reduce(
-        (sum, v) => sum + v.noi.noi,
+        (sum, v) => {
+          const noi = toNum(v.noi?.noi);
+          return sum + noi;
+        },
         0
       );
 
       // Calculate averages
       const capRates = valuations
-        .map((v) => v.capRate.capRate)
-        .filter((r) => r > 0);
+        .map((v) => {
+          const capRate = toNum(v.capRate?.capRate);
+          return capRate;
+        })
+        .filter((r) => !isNaN(r) && r > 0);
       const averageCapRate =
         capRates.length > 0
           ? capRates.reduce((sum, r) => sum + r, 0) / capRates.length
           : undefined;
 
+      // Calculate cash-on-cash returns - include all valid values (including negative)
+      // Only include deals where we have cash invested (otherwise calculation is invalid)
       const cashOnCashReturns = valuations
-        .map((v) => v.returns.cashOnCashReturn)
-        .filter((r) => r > 0);
+        .map((v) => {
+          const cashInvested = toNum(v.totalCashInvested);
+          // Only calculate if we have cash invested
+          if (cashInvested > 0) {
+            const coc = toNum(v.returns?.cashOnCashReturn);
+            return isNaN(coc) ? null : coc;
+          }
+          return null;
+        })
+        .filter((r) => r !== null) as number[];
+      
       const averageCashOnCashReturn =
         cashOnCashReturns.length > 0
           ? cashOnCashReturns.reduce((sum, r) => sum + r, 0) /
             cashOnCashReturns.length
           : undefined;
 
+      // Helper to safely round and ensure we never return NaN or null
+      const safeRound = (val: any): number => {
+        // Handle all edge cases
+        if (val === null || val === undefined) return 0;
+        const num = typeof val === 'string' ? parseFloat(val) : Number(val);
+        if (isNaN(num) || !isFinite(num)) return 0;
+        const rounded = Math.round(num * 100) / 100;
+        return isNaN(rounded) ? 0 : rounded;
+      };
+
       return {
         totalProperties: properties.length,
         totalDeals: deals.length,
         activeDeals: activeDeals.length,
-        totalPortfolioValue: Math.round(totalPortfolioValue * 100) / 100,
-        totalCashInvested: Math.round(totalCashInvested * 100) / 100,
-        totalAnnualCashFlow: Math.round(totalAnnualCashFlow * 100) / 100,
+        totalPortfolioValue: safeRound(totalPortfolioValue),
+        totalCashInvested: safeRound(totalCashInvested),
+        totalAnnualCashFlow: safeRound(totalAnnualCashFlow),
         averageCapRate: averageCapRate
-          ? Math.round(averageCapRate * 100) / 100
+          ? safeRound(averageCapRate)
           : undefined,
         averageCashOnCashReturn: averageCashOnCashReturn
-          ? Math.round(averageCashOnCashReturn * 100) / 100
+          ? safeRound(averageCashOnCashReturn)
           : undefined,
-        totalMonthlyCashFlow: Math.round(totalMonthlyCashFlow * 100) / 100,
-        totalAnnualNOI: Math.round(totalAnnualNOI * 100) / 100,
+        totalMonthlyCashFlow: safeRound(totalMonthlyCashFlow),
+        totalAnnualNOI: safeRound(totalAnnualNOI),
       };
     } catch (error) {
       this.logger.error(
@@ -355,7 +413,7 @@ export class AnalyticsService {
         );
 
         const totalCashInvested = valuations.reduce(
-          (sum, v) => sum + v.totalAcquisitionCost,
+          (sum, v) => sum + v.totalCashInvested,
           0
         );
 
@@ -390,7 +448,7 @@ export class AnalyticsService {
           propertyId: property.id,
           address: property.address,
           totalDeals: propertyDeals.length,
-          totalCashInvested: Math.round(totalCashInvested * 100) / 100,
+          totalCashInvested: totalCashInvested > 0 ? Math.round(totalCashInvested * 100) / 100 : 0,
           totalAnnualCashFlow: Math.round(totalAnnualCashFlow * 100) / 100,
           averageCapRate: avgCapRate
             ? Math.round(avgCapRate * 100) / 100

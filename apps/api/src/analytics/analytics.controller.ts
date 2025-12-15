@@ -292,8 +292,24 @@ export class AnalyticsController {
   /**
    * Invalidate analytics cache
    * GET /api/analytics/cache/invalidate?pattern=analytics:.*
+   * GET /api/analytics/cache/invalidate (clears all cache)
    */
   @Get('cache/invalidate')
+  @ApiOperation({
+    summary: 'Invalidate analytics cache',
+    description: 'Invalidates cached analytics data. If pattern is provided, only matching cache entries are cleared. If no pattern is provided, all cache is cleared.',
+  })
+  @ApiQuery({
+    name: 'pattern',
+    required: false,
+    type: String,
+    description: 'Optional cache key pattern to invalidate (e.g., "analytics:.*"). If not provided, all cache is cleared.',
+    example: 'analytics:.*',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Cache invalidated successfully',
+  })
   async invalidateCache(@Query('pattern') pattern?: string) {
     if (pattern) {
       this.cacheService.invalidatePattern(pattern);

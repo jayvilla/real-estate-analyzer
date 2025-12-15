@@ -11,6 +11,7 @@ import {
   ParseUUIDPipe,
   Query,
   UseGuards,
+  BadRequestException,
 } from '@nestjs/common';
 import {
   ApiTags,
@@ -227,6 +228,24 @@ export class DealController {
     @CurrentUser() user?: CurrentUserData
   ) {
     if (propertyId) {
+      // Validate that propertyId is a valid UUID string
+      if (
+        typeof propertyId !== 'string' ||
+        propertyId === '[object Object]' ||
+        propertyId.includes('object')
+      ) {
+        throw new BadRequestException(
+          'Invalid propertyId: must be a valid UUID string'
+        );
+      }
+      // Validate UUID format
+      const uuidRegex =
+        /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+      if (!uuidRegex.test(propertyId)) {
+        throw new BadRequestException(
+          'Invalid propertyId: must be a valid UUID format'
+        );
+      }
       return this.dealService.findByPropertyId(propertyId, user.organizationId);
     }
     return this.dealService.findAll(user.organizationId);

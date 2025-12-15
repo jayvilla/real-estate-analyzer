@@ -40,6 +40,9 @@ import {
   MarketReport,
   ExecutiveDashboardSummary,
   SummaryTemplate,
+  Deal,
+  CreateDealDto,
+  UpdateDealDto,
 } from '@real-estate-analyzer/types';
 
 const apiClient = axios.create({
@@ -104,6 +107,40 @@ export const propertyApi = {
 
   delete: async (id: string): Promise<void> => {
     await apiClient.delete(`/properties/${id}`);
+  },
+};
+
+export const dealApi = {
+  getAll: async (propertyId?: string): Promise<Deal[]> => {
+    // Ensure propertyId is a string, not an object
+    let params = '';
+    if (propertyId) {
+      const id = typeof propertyId === 'string' ? propertyId : (propertyId as any)?.id || String(propertyId);
+      if (id && id !== '[object Object]' && typeof id === 'string') {
+        params = `?propertyId=${encodeURIComponent(id)}`;
+      }
+    }
+    const response = await apiClient.get<Deal[]>(`/deals${params}`);
+    return response.data;
+  },
+
+  getById: async (id: string): Promise<Deal> => {
+    const response = await apiClient.get<Deal>(`/deals/${id}`);
+    return response.data;
+  },
+
+  create: async (data: CreateDealDto): Promise<Deal> => {
+    const response = await apiClient.post<Deal>('/deals', data);
+    return response.data;
+  },
+
+  update: async (id: string, data: UpdateDealDto): Promise<Deal> => {
+    const response = await apiClient.patch<Deal>(`/deals/${id}`, data);
+    return response.data;
+  },
+
+  delete: async (id: string): Promise<void> => {
+    await apiClient.delete(`/deals/${id}`);
   },
 };
 

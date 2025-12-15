@@ -63,6 +63,12 @@ export function Navigation() {
               Properties
             </Link>
             <Link
+              href="/deals"
+              className="px-4 py-2 text-sm font-medium text-neutral-700 dark:text-neutral-300 hover:text-brand-primary-600 dark:hover:text-brand-primary-400 rounded-lg hover:bg-neutral-50 dark:hover:bg-neutral-800 transition-colors duration-200"
+            >
+              Deals
+            </Link>
+            <Link
               href="/analytics"
               className="px-4 py-2 text-sm font-medium text-neutral-700 dark:text-neutral-300 hover:text-brand-primary-600 dark:hover:text-brand-primary-400 rounded-lg hover:bg-neutral-50 dark:hover:bg-neutral-800 transition-colors duration-200"
             >

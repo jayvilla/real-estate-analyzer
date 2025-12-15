@@ -288,9 +288,20 @@ async function seed() {
           propData,
           user.organizationId
         );
+        // Set currentValue to simulate appreciation (5-15% above purchase price)
+        const appreciationRate = 0.05 + Math.random() * 0.1; // 5-15% appreciation
+        const currentValue = Math.round(
+          (property.purchasePrice || 0) * (1 + appreciationRate)
+        );
+        await propertyService.update(
+          property.id,
+          { currentValue },
+          user.organizationId
+        );
+        property.currentValue = currentValue;
         createdProperties.push(property);
         console.log(
-          `  ✅ Created property: ${property.address}, ${property.city}, ${property.state}`
+          `  ✅ Created property: ${property.address}, ${property.city}, ${property.state} (Value: $${currentValue.toLocaleString()})`
         );
       } catch (error) {
         console.log(
@@ -300,6 +311,42 @@ async function seed() {
         );
       }
     }
+
+    // Update ALL properties to ensure they have currentValue set
+    console.log('\n💰 Updating property values...');
+    const allPropertiesForValueUpdate = await propertyService.findAll(user.organizationId);
+    let updatedPropertyValues = 0;
+    for (const property of allPropertiesForValueUpdate) {
+      if (!property.currentValue && property.purchasePrice) {
+        try {
+          const appreciationRate = 0.05 + Math.random() * 0.1;
+          const currentValue = Math.round(
+            (property.purchasePrice || 0) * (1 + appreciationRate)
+          );
+          await propertyService.update(
+            property.id,
+            { currentValue },
+            user.organizationId
+          );
+          property.currentValue = currentValue;
+          updatedPropertyValues++;
+          console.log(
+            `  ✅ Updated property value: ${property.address} (Value: $${currentValue.toLocaleString()})`
+          );
+        } catch (error) {
+          console.log(
+            `  ⚠️  Failed to update property ${property.address}: ${
+              error instanceof Error ? error.message : 'Unknown error'
+            }`
+          );
+        }
+      }
+    }
+    if (updatedPropertyValues > 0) {
+      console.log(`\n✅ Updated ${updatedPropertyValues} property values\n`);
+    } else {
+      console.log(`\nℹ️  All properties already have currentValue set\n`);
+    }
     console.log(
       `\n✅ Total properties in portfolio: ${createdProperties.length} (${propertiesToCreate.length} newly created)\n`
     );
@@ -308,23 +355,91 @@ async function seed() {
     console.log('💰 Creating deals for portfolio...');
     let dealsCount = 0;
 
-    // Helper function to generate deal data
+    // Helper function to generate deal data with realistic cash flow
+    // This ensures positive cash flow by calculating expenses properly
     const generateDeal = (property: any, index: number) => {
       const basePrice = property.purchasePrice || 500000;
-      const downPaymentPercent = [20, 25, 30, 20, 25][index % 5];
+      
+      // Down payment: 20-30% (varies by deal)
+      const downPaymentPercent = [20, 25, 30, 20, 25, 30][index % 6];
       const downPayment = Math.round(basePrice * (downPaymentPercent / 100));
       const loanAmount = basePrice - downPayment;
-      const monthlyRental = Math.round(basePrice * 0.006); // ~0.6% of purchase price
+      
+      // Realistic rental income: 0.6-1.0% of purchase price per month
+      // This ensures good cash-on-cash returns
+      const rentalRate = 0.006 + (index % 5) * 0.0008; // 0.6% to 1.0%
+      const monthlyRental = Math.round(basePrice * rentalRate);
       const annualRental = monthlyRental * 12;
-      const monthlyExpenses = Math.round(monthlyRental * 0.35); // ~35% expense ratio
+      
+      // Realistic expense breakdown (monthly)
+      // Property tax: 1.0-1.5% of purchase price annually
+      const propertyTaxAnnualRate = 0.01 + (index % 3) * 0.0025; // 1.0% to 1.5%
+      const propertyTax = Math.round((basePrice * propertyTaxAnnualRate) / 12);
+      
+      // Insurance: 0.25-0.4% of purchase price annually
+      const insuranceAnnualRate = 0.0025 + (index % 3) * 0.0005; // 0.25% to 0.4%
+      const insurance = Math.round((basePrice * insuranceAnnualRate) / 12);
+      
+      // Property management: 8-12% of rental income (calculated monthly)
+      const propertyManagementRate = 8 + (index % 5); // 8-12%
+      const propertyManagement = Math.round(monthlyRental * (propertyManagementRate / 100));
+      
+      // Maintenance: 5-10% of rental income
+      const maintenanceRate = 5 + (index % 6); // 5-10%
+      const maintenance = Math.round(monthlyRental * (maintenanceRate / 100));
+      
+      // CapEx reserve: 8-12% of rental income
+      const capExRate = 8 + (index % 5); // 8-12%
+      const capExReserve = Math.round(monthlyRental * (capExRate / 100));
+      
+      // HOA fees: Only for condos/townhouses, 0-2% of purchase price annually
+      const hasHOA = property.propertyType === 'CONDO' || property.propertyType === 'TOWNHOUSE';
+      const hoaFees = hasHOA ? Math.round((basePrice * (0.005 + (index % 3) * 0.005)) / 12) : 0;
+      
+      // Total monthly operating expenses (NOT including vacancy - that's handled separately)
+      const monthlyExpenses = propertyTax + insurance + propertyManagement + maintenance + capExReserve + hoaFees;
       const annualExpenses = monthlyExpenses * 12;
-
+      
+      // Vacancy rate: 5-8% (used in NOI calculation, not as an expense)
+      const vacancyRate = 5 + (index % 4); // 5-8%
+      
+      // Loan terms - ensure positive cash flow
+      // Interest rate: 4.0-5.5% (realistic for current market)
+      const interestRate = 4.0 + (index % 4) * 0.375; // 4.0% to 5.5%
+      const loanTerm = 360; // 30 years
+      
+      // Calculate debt service to verify cash flow will be positive
+      const monthlyRate = interestRate / 100 / 12;
+      const monthlyDebtService = loanAmount > 0 && interestRate > 0
+        ? (loanAmount * monthlyRate * Math.pow(1 + monthlyRate, loanTerm)) /
+          (Math.pow(1 + monthlyRate, loanTerm) - 1)
+        : 0;
+      const annualDebtService = monthlyDebtService * 12;
+      
+      // Calculate expected NOI and cash flow
+      const effectiveGrossIncome = annualRental * (1 - vacancyRate / 100);
+      const expectedNOI = effectiveGrossIncome - annualExpenses;
+      const expectedCashFlow = expectedNOI - annualDebtService;
+      
+      // If cash flow would be negative, adjust rental income upward
+      let adjustedMonthlyRental = monthlyRental;
+      if (expectedCashFlow < 0) {
+        // Increase rental to ensure at least 5% cash-on-cash return
+        const targetAnnualCashFlow = (downPayment + (basePrice * 0.02)) * 0.05; // 5% of cash invested
+        const requiredNOI = targetAnnualCashFlow + annualDebtService;
+        const requiredGrossIncome = (requiredNOI + annualExpenses) / (1 - vacancyRate / 100);
+        adjustedMonthlyRental = Math.round(requiredGrossIncome / 12);
+      }
+      
       const statuses = [
+        DealStatus.CLOSED,
+        DealStatus.CLOSED,
+        DealStatus.CLOSED,
         DealStatus.UNDER_CONTRACT,
         DealStatus.CLOSED,
-        DealStatus.DRAFT,
+        DealStatus.CLOSED,
       ];
-      const status = statuses[index % 3];
+      const status = statuses[index % 6];
 
       const purchaseDates = [
         '2024-01-15',
@@ -344,62 +459,124 @@ async function seed() {
         '2023-09-05',
       ];
 
+      // Closing costs: 2-3% of purchase price
+      const closingCosts = Math.round(basePrice * (0.02 + (index % 2) * 0.005));
+      
+      // Rehab costs: 0-8% of purchase price (some properties need work)
+      const rehabCosts = index % 5 === 0 ? Math.round(basePrice * (0.03 + (index % 4) * 0.0125)) : undefined;
+
       return {
         propertyId: property.id,
         purchasePrice: basePrice,
         purchaseDate: new Date(
           purchaseDates[index] || '2024-01-01'
         ).toISOString(),
-        closingCosts: Math.round(basePrice * 0.02),
-        rehabCosts: index % 3 === 0 ? Math.round(basePrice * 0.05) : undefined,
+        closingCosts: closingCosts,
+        rehabCosts: rehabCosts,
         loanType: [
+          LoanType.CONVENTIONAL,
           LoanType.CONVENTIONAL,
           LoanType.FHA,
           LoanType.CONVENTIONAL,
           LoanType.CASH,
           LoanType.CONVENTIONAL,
-        ][index % 5],
+        ][index % 6],
         loanAmount: loanAmount,
         downPayment: downPayment,
         downPaymentPercent: downPaymentPercent,
-        interestRate: 4.5 + (index % 3) * 0.25,
-        loanTerm: 360,
-        monthlyRentalIncome: monthlyRental,
-        annualRentalIncome: annualRental,
+        interestRate: interestRate,
+        loanTerm: loanTerm,
+        monthlyRentalIncome: adjustedMonthlyRental,
+        annualRentalIncome: adjustedMonthlyRental * 12,
         monthlyExpenses: monthlyExpenses,
         annualExpenses: annualExpenses,
-        vacancyRate: 5 + (index % 3),
-        propertyManagementRate: 8 + (index % 4),
-        annualAppreciationRate: 3 + (index % 2) * 0.5,
+        vacancyRate: vacancyRate,
+        propertyManagementRate: propertyManagementRate,
+        annualAppreciationRate: 3 + (index % 3) * 0.5, // 3-4.5%
         annualInflationRate: 2.5,
-        capExReserve: Math.round(monthlyRental * 0.1),
-        insurance: Math.round(basePrice * 0.0003),
-        propertyTax: Math.round((basePrice * 0.012) / 12),
+        capExReserve: capExReserve,
+        insurance: insurance,
+        propertyTax: propertyTax,
+        hoaFees: hoaFees || undefined,
         status: status,
       };
     };
 
-    for (let i = 0; i < createdProperties.length; i++) {
-      const dealData = generateDeal(createdProperties[i], i);
-      try {
-        const deal = await dealService.create(dealData, organization.id);
-        console.log(
-          `  ✅ Created deal ${i + 1}/${
-            createdProperties.length
-          }: $${deal.purchasePrice.toLocaleString()} - ${
-            createdProperties[i].city
-          }, ${createdProperties[i].state}`
-        );
-        dealsCount++;
-      } catch (error) {
-        console.log(
-          `  ⚠️  Failed to create deal for property ${i + 1}: ${
-            error instanceof Error ? error.message : 'Unknown error'
-          }`
-        );
+    // Get all properties (including existing ones) to ensure all deals are updated
+    const allPropertiesForDeals = await propertyService.findAll(user.organizationId);
+    
+    // Get existing deals to avoid duplicates
+    const existingDeals = await dealService.findAll(organization.id);
+    const existingDealPropertyIds = new Set(existingDeals.map(d => d.propertyId));
+
+    for (let i = 0; i < allPropertiesForDeals.length; i++) {
+      const property = allPropertiesForDeals[i];
+      const dealData = generateDeal(property, i);
+      
+      // Check if deal already exists for this property
+      const existingDeal = existingDeals.find(d => d.propertyId === property.id);
+      
+      if (existingDeal) {
+        // Always update existing deals to ensure they have proper values
+        // This fixes deals that were created before the seed script was updated
+        try {
+          await dealService.update(existingDeal.id, {
+            monthlyRentalIncome: dealData.monthlyRentalIncome,
+            annualRentalIncome: dealData.annualRentalIncome,
+            monthlyExpenses: dealData.monthlyExpenses,
+            annualExpenses: dealData.annualExpenses,
+            downPayment: dealData.downPayment,
+            closingCosts: dealData.closingCosts,
+            rehabCosts: dealData.rehabCosts,
+            loanAmount: dealData.loanAmount,
+            downPaymentPercent: dealData.downPaymentPercent,
+            interestRate: dealData.interestRate,
+            loanTerm: dealData.loanTerm,
+            vacancyRate: dealData.vacancyRate,
+            propertyManagementRate: dealData.propertyManagementRate,
+            capExReserve: dealData.capExReserve,
+            insurance: dealData.insurance,
+            propertyTax: dealData.propertyTax,
+            hoaFees: dealData.hoaFees,
+            annualAppreciationRate: dealData.annualAppreciationRate,
+            annualInflationRate: dealData.annualInflationRate,
+            status: dealData.status,
+          }, organization.id);
+          console.log(
+            `  ✅ Updated deal for property ${i + 1}/${
+              allPropertiesForDeals.length
+            }: ${property.city}, ${property.state} (Rental: $${dealData.monthlyRentalIncome.toLocaleString()}/mo, Cash Invested: $${((dealData.downPayment || 0) + (dealData.closingCosts || 0) + (dealData.rehabCosts || 0)).toLocaleString()})`
+          );
+          dealsCount++;
+        } catch (error) {
+          console.log(
+            `  ⚠️  Failed to update deal for property ${i + 1}: ${
+              error instanceof Error ? error.message : 'Unknown error'
+            }`
+          );
+        }
+      } else {
+        // Create new deal
+        try {
+          const deal = await dealService.create(dealData, organization.id);
+          console.log(
+            `  ✅ Created deal ${i + 1}/${
+              allPropertiesForDeals.length
+            }: $${deal.purchasePrice.toLocaleString()} - ${
+              property.city
+            }, ${property.state} (Rental: $${dealData.monthlyRentalIncome.toLocaleString()}/mo, Cash Invested: $${((dealData.downPayment || 0) + (dealData.closingCosts || 0) + (dealData.rehabCosts || 0)).toLocaleString()})`
+          );
+          dealsCount++;
+        } catch (error) {
+          console.log(
+            `  ⚠️  Failed to create deal for property ${i + 1}: ${
+              error instanceof Error ? error.message : 'Unknown error'
+            }`
+          );
+        }
       }
     }
-    console.log(`\n✅ Created ${dealsCount} deals\n`);
+    console.log(`\n✅ Processed ${dealsCount} deals (created/updated)\n`);
 
     console.log('🎉 Seed completed successfully!');
     console.log('\n📋 Test Credentials:');
@@ -408,22 +585,33 @@ async function seed() {
     console.log(
       `   Organization: ${organization.name || 'My Real Estate Company'}`
     );
-    console.log(`   Properties: ${createdProperties.length}`);
+    const allProperties = await propertyService.findAll(user.organizationId);
+    console.log(`   Properties: ${allProperties.length}`);
     console.log(`   Deals: ${dealsCount}`);
     console.log('\n📊 Portfolio Summary:');
-    const totalValue = createdProperties.reduce((sum, p) => {
-      const price =
-        typeof p.purchasePrice === 'number'
-          ? p.purchasePrice
-          : parseFloat(p.purchasePrice || '0');
-      return sum + price;
+    const totalValue = allProperties.reduce((sum, p) => {
+      const value =
+        typeof p.currentValue === 'number'
+          ? p.currentValue
+          : parseFloat(p.currentValue?.toString() || '0') ||
+            (typeof p.purchasePrice === 'number'
+              ? p.purchasePrice
+              : parseFloat(p.purchasePrice?.toString() || '0'));
+      return sum + value;
     }, 0);
     console.log(`   Total Portfolio Value: $${totalValue.toLocaleString()}`);
     const avgValue =
-      createdProperties.length > 0
-        ? Math.round(totalValue / createdProperties.length)
+      allProperties.length > 0
+        ? Math.round(totalValue / allProperties.length)
         : 0;
     console.log(`   Average Property Value: $${avgValue.toLocaleString()}`);
+    
+    // Calculate total cash invested from all deals
+    const allDeals = await dealService.findAll(organization.id);
+    const totalCashInvested = allDeals.reduce((sum, deal) => {
+      return sum + (deal.downPayment || 0) + (deal.closingCosts || 0) + (deal.rehabCosts || 0);
+    }, 0);
+    console.log(`   Total Cash Invested: $${totalCashInvested.toLocaleString()}`);
     const states = [...new Set(createdProperties.map((p) => p.state))];
     console.log(`   States: ${states.join(', ')}`);
     const propertyTypes = [
